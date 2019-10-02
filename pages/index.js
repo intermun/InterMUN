@@ -11,15 +11,32 @@ const Home = () => (
         href="https://fonts.googleapis.com/css?family=Montserrat:600&display=swap"
         rel="stylesheet"
       ></link>
+      <link
+        href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+        rel="stylesheet"
+        integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+        crossorigin="anonymous"
+      ></link>
     </Head>
     <Nav />
-    <div id="main-title">INTERMUN</div>
-    <div id="main-year">2020</div>
-    <div id="main-info">Coming soon</div>
+    <div id="main-title" className="montserrat">
+      INTERMUN
+    </div>
+    <div id="main-year" className="montserrat">
+      2020
+    </div>
+    <div id="main-info" className="montserrat">
+      Coming soon
+    </div>
     <style jsx global>{`
+      :root {
+        --accent-color: #05cfd8;
+      }
+      * {
+        box-sizing: border-box;
+      }
       body {
-        background-color: black;
-        font-weight: 600;
+        background-color: #353d4a;
         margin: 0;
       }
       html,
@@ -29,11 +46,11 @@ const Home = () => (
         width: 100%;
         height: 100%;
       }
-      div,
-      a {
+      .montserrat {
         font-family: "Montserrat";
-        color: white;
+        color: var(--accent-color);
         text-decoration: none;
+        font-weight: 600;
       }
       #main {
         display: flex;
