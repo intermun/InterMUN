@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const Nav = () => (
   <div id="nav">
-    <div className="nav-item">
+    {/* <div className="nav-item">
       <Link href="/about">
         <a>About</a>
       </Link>
@@ -12,13 +12,13 @@ const Nav = () => (
       <Link href="/resources">
         <a>Resources</a>
       </Link>
-    </div>
+    </div> */}
     <div className="nav-item">
       <Link href="/">
         <img src="/static/logo.svg" id="logo" />
       </Link>
     </div>
-    <div className="nav-item">
+    {/* <div className="nav-item">
       <Link href="/chronicle">
         <a>Chronicle</a>
       </Link>
@@ -27,12 +27,12 @@ const Nav = () => (
       <Link href="/register">
         <a>Register</a>
       </Link>
-    </div>
+    </div> */}
     <style jsx>{`
       #nav {
         width: 100%;
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
         padding-top: 15px;
       }

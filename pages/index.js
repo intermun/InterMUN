@@ -14,6 +14,8 @@ const Home = () => (
     </Head>
     <Nav />
     <div id="main-title">INTERMUN</div>
+    <div id="main-year">2020</div>
+    <div id="main-info">Coming soon</div>
     <style jsx global>{`
       body {
         background-color: black;
@@ -41,6 +43,15 @@ const Home = () => (
         align-self: center;
         font-size: 50px;
         margin-top: 35px;
+      }
+      #main-year {
+        align-self: center;
+        font-size: 40px;
+      }
+      #main-info {
+        align-self: center;
+        font-size: 35px;
+        margin-top: 30px;
       }
     `}</style>
   </div>
