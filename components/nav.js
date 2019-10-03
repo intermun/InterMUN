@@ -30,12 +30,13 @@ const _menuItems = [
   }
 ];
 
-const mobileThreshold = 400;
+const mobileThreshold = 500;
 
 const Nav = () => {
   const [width, setWidth] = useState(0);
   const [showMenu, setShowMenu] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
+  const [menuState, setMenuState] = useState("closed");
 
   const navRefs = useRef(
     Array.apply(null, Array(5))
@@ -43,7 +44,7 @@ const Nav = () => {
       .map(_ => React.createRef())
   );
 
-  const isMobile = () => width < mobileThreshold;
+  const isMobile = () => width <= mobileThreshold;
 
   useEffect(() => {
     const handleResize = () => {
@@ -61,29 +62,31 @@ const Nav = () => {
     };
   }, []);
 
-  const animate = refToAnimate => {
-    let pos = 0;
-    const interval = setInterval(() => {
-      pos += 10;
-      refToAnimate.style.opacity = `${pos}%`;
-      if (pos === 100) {
-        clearInterval(interval);
-      }
-    }, 100);
-  };
-
   React.useEffect(() => {
     if (showMenu) {
-      navRefs.current.forEach((navRef, index) => {
-        if (index > 0) {
-          animate(navRef.current);
-        }
-      });
+      setMenuState("opening");
     }
+    setTimeout(() => {
+      setMenuState(showMenu ? "opened" : "closed");
+    }, 500);
   }, [showMenu]);
 
+  React.useEffect(() => {
+    if (menuState === "opening") {
+      setShowMenu(true);
+    } else if (menuState === "closing") {
+      setTimeout(() => {
+        setShowMenu(false);
+      }, 500);
+    }
+  }, [menuState]);
+
   const toggleMenu = () => {
-    setShowMenu(!showMenu);
+    if (!showMenu) {
+      setMenuState("opening");
+    } else {
+      setMenuState("closing");
+    }
   };
 
   return (
@@ -92,9 +95,13 @@ const Nav = () => {
         (item, index) =>
           (!isMobile() || (isMobile() && showMenu) || item.src) && (
             <div
-              className={isMobile() && item.src ? "mobile-nav" : "nav-item"}
+              className={
+                isMobile() && item.src
+                  ? "mobile-nav"
+                  : `nav-item ${menuState} ${item.src ? "logo-container" : ""}`
+              }
               key={item.index}
-              ref={navRefs.current[index]}
+              disabled={menuState === "opening" || menuState === "closing"}
             >
               <Link href={item.href}>
                 {item.text ? (
@@ -134,22 +141,78 @@ const Nav = () => {
           width: 100%;
           display: flex;
           justify-content: space-between;
-          align-items: ${isMobile() ? "flex-start" : "center"};
-          padding: ${isMobile() ? "15px 0 0 15px" : "15px"};
-          flex-direction: ${isMobile() ? "column" : "row"};
+          align-items: center;
+          padding: 15px;
+          flex-direction: row;
         }
         #logo {
           opacity: 1;
-          width: ${isMobile() ? 75 : 50}px;
-          height: ${isMobile() ? 75 : 50}px;
+          width: 75px;
+          height: 75px;
         }
         .nav-item {
           width: 100px;
           display: flex;
           align-items: center;
-          justify-content: ${isMobile() ? "flex-start" : "center"};
-          ${isMobile() ? "margin: 10px 0" : ""}
-          opacity: 0;
+          justify-content: center;
+        }
+        .nav-item:not(.logo-container) {
+          height: 20px;
+        }
+        @media only screen and (max-width: ${mobileThreshold}px) {
+          #nav {
+            align-items: flex-start;
+            padding: 15px 0 0 15px;
+            flex-direction: column;
+          }
+          #logo {
+            width: 50px;
+            height: 50px;
+          }
+          .nav-item {
+            justify-content: start;
+            overflow: hidden;
+          }
+          .nav-item.closed {
+            opacity: 0;
+            margin: 0;
+            height: 0;
+          }
+          .nav-item.closing {
+            animation: fadeOut 0.5s forwards;
+          }
+          .nav-item.opening {
+            animation: fadeIn 0.5s forwards;
+          }
+          .nav-item.opened {
+            opacity: 1;
+            margin: 10px 0;
+            height: 20px;
+          }
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              margin: 0;
+              height: 0;
+            }
+            to {
+              opacity: 1;
+              margin: 10px 0;
+              height: 20px;
+            }
+          }
+          @keyframes fadeOut {
+            from {
+              opacity: 1;
+              margin: 10px 0;
+              height: 20px;
+            }
+            to {
+              opacity: 0;
+              margin: 0;
+              height: 0;
+            }
+          }
         }
       `}</style>
     </div>

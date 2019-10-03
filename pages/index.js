@@ -70,6 +70,9 @@ const Home = () => (
         font-size: 35px;
         margin-top: 30px;
       }
+      div[disabled] {
+        pointer-events: none;
+      }
     `}</style>
   </div>
 );
