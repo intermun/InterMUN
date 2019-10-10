@@ -5,11 +5,6 @@ import Head from "next/head";
 import { PageTransition } from "next-page-transitions";
 
 export default class MyApp extends App {
-  static async getInitialProps(appContext) {
-    const appProps = await App.getInitialProps(appContext);
-    return { ...appProps };
-  }
-
   render() {
     const { Component, pageProps, router } = this.props;
     return (
