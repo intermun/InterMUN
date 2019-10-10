@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import _sortBy from "lodash/sortBy";
 import Link from "next/link";
+import Router from "next/router";
 
 const _menuItems = [
   {
@@ -57,6 +58,9 @@ const Nav = () => {
     };
     handleResize();
     window.addEventListener("resize", handleResize);
+    Router.events.on("routeChangeStart", () => {
+      setMenuState("closing");
+    });
     return () => {
       window.removeEventListener("resize", handleResize);
     };
@@ -103,24 +107,22 @@ const Nav = () => {
               key={item.index}
               disabled={menuState === "opening" || menuState === "closing"}
             >
-              <Link href={item.href}>
-                {item.text ? (
-                  <a className="montserrat">{item.text}</a>
-                ) : isMobile() ? (
-                  <>
-                    <div id="logo">
-                      <img src={item.src} />
-                    </div>
-                    <i
-                      className="fa fa-bars"
-                      id="hamburger"
-                      onClick={toggleMenu}
-                    ></i>
-                  </>
-                ) : (
-                  <img src={item.src} id="logo" />
+              <>
+                <Link href={item.href}>
+                  {item.text ? (
+                    <a className="montserrat">{item.text}</a>
+                  ) : (
+                    <img src={item.src} id="logo" />
+                  )}
+                </Link>
+                {isMobile() && item.src && (
+                  <i
+                    className="fa fa-bars"
+                    id="hamburger"
+                    onClick={toggleMenu}
+                  ></i>
                 )}
-              </Link>
+              </>
             </div>
           )
       )}

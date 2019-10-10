@@ -7,7 +7,6 @@ import { PageTransition } from "next-page-transitions";
 export default class MyApp extends App {
   static async getInitialProps(appContext) {
     const appProps = await App.getInitialProps(appContext);
-    console.log("AAAAA");
     return { ...appProps };
   }
 
@@ -26,7 +25,7 @@ export default class MyApp extends App {
             href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
             rel="stylesheet"
             integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
-            crossorigin="anonymous"
+            crossOrigin="anonymous"
           ></link>
         </Head>
         <Nav />
