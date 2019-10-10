@@ -29,20 +29,27 @@ export default class MyApp extends App {
         </PageTransition>
         <style jsx global>{`
           :root {
-            --accent-color: #05cfd8;
+            --accent-color: #8be27e;
+            --background-color: #3dd6af;
+            --text-color: #2469a0;
+            --secondary-color: #10bce3;
           }
           * {
             box-sizing: border-box;
-          }
-          body {
-            background-color: #353d4a;
-            margin: 0;
           }
           html,
           body,
           #__next {
             width: 100%;
             height: 100%;
+            margin: 0;
+          }
+          #__next {
+            background: linear-gradient(
+              to top,
+              var(--background-color),
+              var(--secondary-color)
+            );
           }
           .page-transition-enter {
             opacity: 0;
@@ -60,7 +67,7 @@ export default class MyApp extends App {
           }
           .montserrat {
             font-family: "Montserrat";
-            color: var(--accent-color);
+            color: var(--text-color);
             text-decoration: none;
             font-weight: 600;
           }
