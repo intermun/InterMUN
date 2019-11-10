@@ -2,13 +2,13 @@ import React from "react";
 
 const Home = () => (
   <div id="home">
-    <div id="main-title" className="montserrat">
+    <div id="main-title" className="montserrat info">
       INTERMUN
     </div>
-    <div id="main-year" className="montserrat">
+    <div id="main-year" className="montserrat info">
       2020
     </div>
-    <div id="main-info" className="montserrat">
+    <div id="main-info" className="montserrat info">
       Coming soon
     </div>
     <style jsx global>{`
@@ -32,6 +32,9 @@ const Home = () => (
       }
       div[disabled] {
         pointer-events: none;
+      }
+      .info {
+        color: var(--text-color);
       }
     `}</style>
   </div>

@@ -129,7 +129,7 @@ const Nav = () => {
               <>
                 <Link href={item.href}>
                   {item.text ? (
-                    <a className="montserrat">{item.text}</a>
+                    <a className="montserrat-default">{item.text}</a>
                   ) : (
                     <img src={item.src} id="logo" />
                   )}
