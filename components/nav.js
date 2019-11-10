@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import _sortBy from "lodash/sortBy";
 import Link from "next/link";
 import Router from "next/router";
+import WindowSizeListener from "./windowSizeListener";
 
 const _menuItems = [
   {
@@ -31,49 +32,24 @@ const _menuItems = [
   }
 ];
 
-const mobileThreshold = 500;
-
 const Nav = () => {
-  const [width, setWidth] = useState(0);
   const [menuItems, setMenuItems] = useState([]);
-  /*
-    there are 4 menu states:
-    1. closed: menu fully closed, only logo and toggle shown
-    2. closing: animation to close the menu in progress
-    3. opened: menu fully opened, all items shown
-    4. opening: animation to open the menu in progress
-  */
   const [menuState, setMenuState] = useState("closed");
 
-  const isMobile = () => width <= mobileThreshold;
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < mobileThreshold) {
-        // if mobile, rearrange the items so that the logo is on the top
-        setMenuItems(_sortBy(_menuItems, ["index"]));
-      } else {
-        // if desktop, set the menu items as default
-        setMenuItems(_menuItems);
-      }
-      setWidth(window.innerWidth);
-    };
-    handleResize();
     const handleRouteChange = () => {
-      // when pressing on a link, animate the menu
       setMenuState("closing");
     };
-    window.addEventListener("resize", handleResize);
     Router.events.on("routeChangeStart", handleRouteChange);
     return () => {
-      window.removeEventListener("resize", handleResize);
       Router.events.off("routeChangeStart", handleRouteChange);
     };
   }, []);
 
   useEffect(() => {
     setTimeout(() => {
-      // finish the animation
       if (menuState === "opening") {
         setMenuState("opened");
       } else if (menuState === "closing") {
@@ -83,44 +59,29 @@ const Nav = () => {
   }, [menuState]);
 
   const toggleMenu = () => {
-    // trigger the correct animation
     setMenuState(menuState !== "closed" ? "closing" : "opening");
   };
 
   return (
     <div id="nav">
+      <WindowSizeListener
+        onBecomeMobile={() => {
+          setMenuItems(_sortBy(_menuItems, ["index"]));
+          setIsMobile(true);
+        }}
+        onBecomeDesktop={() => {
+          setMenuItems(_menuItems);
+          setIsMobile(false);
+        }}
+      />
       {menuItems.map(
         item =>
-          /* 
-            always show logo
-            show items if:
-              desktop mode
-              mobile mode and menu open
-          */
-          (!isMobile() ||
-            (isMobile() && menuState !== "closed") ||
-            item.src) && (
+          (!isMobile || (isMobile && menuState !== "closed") || item.src) && (
             <div
-              className={`${
-                /* 
-                  if mobile, make the logo a container for itself and the menu toggle
-                  if desktop, make the logo a standard button
-                */
-                isMobile() && item.src ? "mobile-nav" : "nav-item"
-                /* 
-                  if mobile, also show the menu state (for animations)
-                */
-              } ${isMobile() ? menuState : ""} ${
-                /* 
-                  if it is an image, wrap it in a container
-                */
-                item.src ? "logo-container" : ""
-              } ${
-                /*
-                  if the animation is running, disable the buttons
-                */
-                isMobile() &&
-                (menuState === "opening" || menuState === "closing")
+              className={`${isMobile && item.src ? "mobile-nav" : "nav-item"} ${
+                isMobile ? menuState : ""
+              } ${item.src ? "logo-container" : ""} ${
+                isMobile && (menuState === "opening" || menuState === "closing")
                   ? "disabled"
                   : ""
               }`}
@@ -134,10 +95,7 @@ const Nav = () => {
                     <img src={item.src} id="logo" />
                   )}
                 </Link>
-                {/*
-                  only show the menu button if on mobile and only next to the logo
-                */}
-                {isMobile() && item.src && (
+                {isMobile && item.src && (
                   <i
                     className="fa fa-bars"
                     id="hamburger"
@@ -186,7 +144,7 @@ const Nav = () => {
         .disabled {
           pointer-events: none;
         }
-        @media only screen and (max-width: ${mobileThreshold}px) {
+        @media only screen and (max-width: 500px) {
           #nav {
             align-items: flex-start;
             padding: 15px 0 0 15px;

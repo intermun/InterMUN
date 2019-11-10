@@ -5,12 +5,22 @@ const _steps = [
     name: "Personal information",
     fields: [
       {
-        name: "Full name",
-        type: "normal"
+        placeholder: "Full name",
+        type: "normal",
+        additionalInfo: "Required",
+        name: "What is your full name?"
       },
       {
-        name: "High School",
-        type: "normal"
+        name: "What is your high school",
+        type: "normal",
+        placeholder: "High school",
+        additionalInfo: "Required"
+      },
+      {
+        name: "What is your email?",
+        type: "normal",
+        placeholder: "High school",
+        additionalInfo: "Required"
       }
     ]
   },
