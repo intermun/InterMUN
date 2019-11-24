@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import WindowSizeListener from "./windowSizeListener";
 
 const Form = props => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [currentField, setCurrentField] = useState(0);
+  const [currentStep, setCurrentStep] = useState(-1);
   const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setCurrentStep(0);
+  }, []);
 
   const renderStep = index => (
     <React.Fragment key={`step-${index}`}>
@@ -53,13 +56,14 @@ const Form = props => {
         }
         .border {
           width: calc(
-            100% * ${currentField + 1} / ${props.steps[index].fields.length}
+            100% * ${currentStep + 1} / ${props.steps[index].fields.length}
           );
           height: 2px;
           background-color: var(--accent-color);
           position: absolute;
           left: 0;
           bottom: 0;
+          transition: 1s ease all;
         }
       `}</style>
     </React.Fragment>
@@ -80,7 +84,7 @@ const Form = props => {
         <div id="steps">{props.steps.map((_, index) => renderStep(index))}</div>
         <div id="content">
           <div id="inner-content">
-            <div id="form-info">
+            {currentStep > -1 && <div id="form-info">
               <div id="title" className="montserrat">
                 {props.steps[currentIndex].fields[currentStep].name}
               </div>
@@ -101,7 +105,7 @@ const Form = props => {
                   }
                 }}
               />
-            </div>
+            </div>}
             <div id="next-button" className="montserrat" onClick={goNext}>
               <div id="triangle" />
             </div>
@@ -130,12 +134,13 @@ const Form = props => {
         }
         #inner-content {
           display: flex;
+          align-items: center;
         }
         #form-info {
           flex: 1;
         }
         #next-button {
-          height: 100%;
+          height: 125px;
           width: 50px;
           background-color: var(--accent-color);
           color: var(--background-color);

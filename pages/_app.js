@@ -23,10 +23,14 @@ export default class MyApp extends App {
             crossOrigin="anonymous"
           ></link>
         </Head>
-        <Nav />
-        <PageTransition timeout={300} classNames="page-transition">
-          <Component {...pageProps} key={router.route} />
-        </PageTransition>
+        <div id="main"> 
+          <Nav />   
+          <div id="component">  
+            <PageTransition timeout={300} classNames="page-transition">
+              <Component {...pageProps} key={router.route} />
+            </PageTransition>
+          </div>    
+        </div>
         <style jsx global>{`
           :root {
             --accent-color: #0d6cf6;
@@ -36,6 +40,14 @@ export default class MyApp extends App {
           }
           * {
             box-sizing: border-box;
+          }
+          #main {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+          }
+          #component {
+            flex: 1;
           }
           html,
           body,
@@ -49,16 +61,24 @@ export default class MyApp extends App {
             background-color: var(--background-color);
           }
           .page-transition-enter {
+            width: 100%;
+            height: 100%;
             opacity: 0;
           }
           .page-transition-enter-active {
+            width: 100%;
+            height: 100%;
             opacity: 1;
             transition: opacity 300ms;
           }
           .page-transition-exit {
+            width: 100%;
+            height: 100%;
             opacity: 1;
           }
           .page-transition-exit-active {
+            width: 100%;
+            height: 100%;
             opacity: 0;
             transition: opacity 300ms;
           }
