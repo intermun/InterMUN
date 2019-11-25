@@ -23,14 +23,10 @@ export default class MyApp extends App {
             crossOrigin="anonymous"
           ></link>
         </Head>
-        <div id="main">
-          <Nav />
-          <div id="component">
-            <PageTransition timeout={300} classNames="page-transition">
-              <Component {...pageProps} key={router.route} />
-            </PageTransition>
-          </div>
-        </div>
+        <Nav />
+        <PageTransition timeout={300} classNames="page-transition">
+          <Component {...pageProps} key={router.route} />
+        </PageTransition>
         <style jsx global>{`
           :root {
             --accent-color: #0d6cf6;
@@ -41,13 +37,11 @@ export default class MyApp extends App {
           * {
             box-sizing: border-box;
           }
-          #main {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-          }
-          #component {
-            flex: 1;
+          html,
+          body,
+          #__next {
+            width: 100%;
+            height: 100%;
           }
           body:after {
             content: "";
@@ -59,38 +53,43 @@ export default class MyApp extends App {
             z-index: -1;
             background: var(--background-color);
           }
-          html,
-          body,
-          #__next,
-          .page-transition-enter-done {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-          }
           #__next {
             background-color: var(--background-color);
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
           }
           .page-transition-enter {
-            width: 100%;
-            height: 100%;
             opacity: 0;
+            width: 100%;
+            flex: 1;
+            overflow: scroll;
           }
           .page-transition-enter-active {
-            width: 100%;
-            height: 100%;
             opacity: 1;
             transition: opacity 300ms;
+            width: 100%;
+            flex: 1;
+            overflow: scroll;
+          }
+          .page-transition-enter-done {
+            width: 100%;
+            flex: 1;
+            overflow: scroll;
           }
           .page-transition-exit {
-            width: 100%;
-            height: 100%;
             opacity: 1;
+            width: 100%;
+            flex: 1;
+            overflow: scroll;
           }
           .page-transition-exit-active {
-            width: 100%;
-            height: 100%;
             opacity: 0;
             transition: opacity 300ms;
+            width: 100%;
+            flex: 1;
+            overflow: scroll;
           }
           .montserrat-default {
             font-family: "Montserrat";

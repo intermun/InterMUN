@@ -36,7 +36,6 @@ const Form = props => {
           flex-direction: column;
           justify-content: center;
           padding-left: 15px;
-          position: relative;
           cursor: pointer;
         }
         .step-number {
@@ -53,17 +52,6 @@ const Form = props => {
             : "var(--disabled-text-color)"};
           transition: all 0.5s;
           margin-bottom: ${isMobile ? "5px" : 0};
-        }
-        .border {
-          width: calc(
-            100% * ${currentStep + 1} / ${props.steps[index].fields.length}
-          );
-          height: 2px;
-          background-color: var(--accent-color);
-          position: absolute;
-          left: 0;
-          bottom: 0;
-          transition: 1s ease all;
         }
       `}</style>
     </React.Fragment>
@@ -107,7 +95,6 @@ const Form = props => {
                 }}
               />
             </div>
-
             <div id="next-button" className="montserrat" onClick={goNext}>
               <div id="triangle" />
             </div>
@@ -122,7 +109,6 @@ const Form = props => {
           flex-direction: column;
         }
         #steps {
-          height: ${isMobile ? "auto" : "75px"};
           width: 100%;
           display: flex;
           flex-direction: ${isMobile ? "column" : "row"};
@@ -145,6 +131,7 @@ const Form = props => {
           justify-content: center;
           flex-direction: column;
           padding-left: 30px;
+          overflow: scroll;
         }
         #inner-content {
           display: flex;
