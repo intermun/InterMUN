@@ -23,13 +23,13 @@ export default class MyApp extends App {
             crossOrigin="anonymous"
           ></link>
         </Head>
-        <div id="main"> 
-          <Nav />   
-          <div id="component">  
+        <div id="main">
+          <Nav />
+          <div id="component">
             <PageTransition timeout={300} classNames="page-transition">
               <Component {...pageProps} key={router.route} />
             </PageTransition>
-          </div>    
+          </div>
         </div>
         <style jsx global>{`
           :root {
@@ -48,6 +48,16 @@ export default class MyApp extends App {
           }
           #component {
             flex: 1;
+          }
+          body:after {
+            content: "";
+            position: fixed;
+            top: -50%;
+            right: -50%;
+            bottom: -50%;
+            left: -50%;
+            z-index: -1;
+            background: var(--background-color);
           }
           html,
           body,

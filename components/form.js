@@ -3,11 +3,12 @@ import WindowSizeListener from "./windowSizeListener";
 
 const Form = props => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [currentStep, setCurrentStep] = useState(-1);
+  const [currentStep, setCurrentStep] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    setCurrentStep(0);
+    setIsLoaded(true);
   }, []);
 
   const renderStep = index => (
@@ -25,11 +26,10 @@ const Form = props => {
       >
         <div className="step-number montserrat">Step {index + 1}</div>
         <div className="step-text montserrat">{props.steps[index].name}</div>
-        {index === currentIndex && <div className="border" />}
       </div>
       <style jsx>{`
         .step {
-          height: 100%;
+          height: ${isMobile ? "50px" : "100%"};
           width: ${isMobile ? "100%" : `calc(100% / ${props.steps.length})`};
           margin: ${isMobile ? "5px" : "0"} 0;
           display: flex;
@@ -82,9 +82,10 @@ const Form = props => {
     <>
       <div id="form">
         <div id="steps">{props.steps.map((_, index) => renderStep(index))}</div>
+        <div className="border" />
         <div id="content">
           <div id="inner-content">
-            {currentStep > -1 && <div id="form-info">
+            <div id="form-info">
               <div id="title" className="montserrat">
                 {props.steps[currentIndex].fields[currentStep].name}
               </div>
@@ -105,7 +106,8 @@ const Form = props => {
                   }
                 }}
               />
-            </div>}
+            </div>
+
             <div id="next-button" className="montserrat" onClick={goNext}>
               <div id="triangle" />
             </div>
@@ -120,10 +122,22 @@ const Form = props => {
           flex-direction: column;
         }
         #steps {
-          height: 75px;
+          height: ${isMobile ? "auto" : "75px"};
           width: 100%;
           display: flex;
           flex-direction: ${isMobile ? "column" : "row"};
+        }
+        .border {
+          width: ${isLoaded
+            ? `calc(
+            100% * ${currentIndex} / ${props.steps.length} + 100% /
+              ${props.steps.length} * ${currentStep + 1} /
+              ${props.steps[currentIndex].fields.length}
+          )`
+            : 0};
+          height: 2px;
+          background-color: var(--accent-color);
+          transition: 0.5s ease all;
         }
         #content {
           flex: 1;

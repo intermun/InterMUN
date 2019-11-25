@@ -19,7 +19,7 @@ const _steps = [
       {
         name: "What is your email?",
         type: "normal",
-        placeholder: "High school",
+        placeholder: "Email",
         additionalInfo: "Required"
       }
     ]
