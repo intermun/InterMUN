@@ -29,7 +29,8 @@ const _steps = [
     fields: [
       {
         name: "Select committee",
-        type: "select"
+        type: "select",
+        placeholder: "Committee"
       }
     ]
   },
@@ -38,7 +39,8 @@ const _steps = [
     fields: [
       {
         name: "Select country",
-        type: "select"
+        type: "select",
+        placeholder: "Country"
       }
     ]
   },

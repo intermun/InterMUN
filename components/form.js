@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import WindowSizeListener from "./windowSizeListener";
 
 const Form = props => {
@@ -9,6 +9,10 @@ const Form = props => {
   const [isMobile, setIsMobile] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [animationState, setAnimationState] = useState("none");
+  const [inputValue, setInputValue] = useState("");
+  const [formData, setFormData] = useState({});
+
+  const inputRef = useRef(null);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -59,18 +63,66 @@ const Form = props => {
     </React.Fragment>
   );
 
+  const assign = (obj, keyPath, value) => {
+    const lastKeyIndex = keyPath.length - 1;
+    for (let i = 0; i < lastKeyIndex; ++i) {
+      const key = keyPath[i];
+      if (!(key in obj)) {
+        obj[key] = {};
+      }
+      obj = obj[key];
+    }
+    obj[keyPath[lastKeyIndex]] = value;
+  };
+
+  const subscriptFormData = (index, step) => {
+    const firstPair = formData[props.steps[index].name];
+    if (firstPair) {
+      return formData[props.steps[index].name][
+        props.steps[index].fields[step].placeholder
+      ];
+    }
+    return undefined;
+  };
+
   const goNext = () => {
-    animate(null, null);
+    const _formData = Object.assign({}, formData);
+    assign(
+      _formData,
+      [
+        props.steps[currentPair.index].name,
+        props.steps[currentPair.index].fields[currentPair.step].placeholder
+      ],
+      inputValue
+    );
+    setFormData(_formData);
+    animate("next", "next");
+  };
+
+  const goPrev = () => {
+    const _formData = Object.assign({}, formData);
+    assign(
+      _formData,
+      [
+        props.steps[currentPair.index].name,
+        props.steps[currentPair.index].fields[currentPair.step].placeholder
+      ],
+      inputValue
+    );
+    setFormData(_formData);
+    animate("prev", "prev");
   };
 
   const animate = (index, step) => {
-    console.log(index, step);
-    if (animationState === "none") {
+    if (
+      animationState === "none" &&
+      !(currentPair.index === 0 && currentPair.step === 0 && index === "prev")
+    ) {
       setAnimationState("animating");
       setTimeout(() => {
-        if (index !== null && step !== null) {
+        if (typeof index === "number" && typeof step === "number") {
           setCurrentPair({ index, step });
-        } else {
+        } else if (index === "next" && step === "next") {
           if (
             currentPair.step !==
             props.steps[currentPair.index].fields.length - 1
@@ -85,6 +137,18 @@ const Form = props => {
               step: 0
             }));
           }
+        } else if (index === "prev" && step === "prev") {
+          if (currentPair.step !== 0) {
+            setCurrentPair(currentPair => ({
+              index: currentPair.index,
+              step: currentPair.step - 1
+            }));
+          } else if (currentPair.index !== 0) {
+            setCurrentPair(currentPair => ({
+              index: currentPair.index - 1,
+              step: props.steps[currentPair.index - 1].fields.length - 1
+            }));
+          }
         }
         setAnimationState("reverting");
       }, 800);
@@ -95,9 +159,207 @@ const Form = props => {
     if (animationState === "reverting") {
       setTimeout(() => {
         setAnimationState("none");
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
       }, 800);
     }
   }, [animationState]);
+
+  useEffect(() => {
+    const subscript = subscriptFormData(currentPair.index, currentPair.step);
+    setInputValue(subscript || "");
+  }, [currentPair]);
+
+  const renderFormContent = () => (
+    <div id="inner-content">
+      <div className="form-button left-button" onClick={goPrev}>
+        <div className="triangle triangle-left" />
+      </div>
+      <div id="form-info">
+        <div id="title" className={`montserrat animation ${animationState}`}>
+          {props.steps[currentPair.index].fields[currentPair.step].name}
+        </div>
+        {props.steps[currentPair.index].fields[currentPair.step]
+          .additionalInfo && (
+          <div
+            id="additional-info"
+            className={`montserrat animation delay-1 ${animationState}`}
+          >
+            {
+              props.steps[currentPair.index].fields[currentPair.step]
+                .additionalInfo
+            }
+          </div>
+        )}
+        <input
+          ref={inputRef}
+          placeholder={
+            props.steps[currentPair.index].fields[currentPair.step].placeholder
+          }
+          id="input"
+          className={`montserrat animation delay-2 ${animationState}`}
+          onKeyDown={e => {
+            if (e.key === "Enter") {
+              goNext();
+            }
+          }}
+          value={inputValue}
+          onChange={event => setInputValue(event.target.value)}
+        />
+      </div>
+      <div className="form-button right-button" onClick={goNext}>
+        <div className="triangle triangle-right" />
+      </div>
+      <style jsx>
+        {`
+          #inner-content {
+            display: flex;
+            align-items: center;
+          }
+          #form-info {
+            flex: 1;
+            padding: 0 15px;
+          }
+          .form-button {
+            height: 125px;
+            width: 50px;
+            background-color: var(--accent-color);
+            color: var(--background-color);
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+          }
+          .left-button {
+            padding-left: 15px;
+          }
+          .right-button {
+            padding-right: 15px;
+          }
+          .triangle {
+            border-right: 10px solid;
+            border-bottom: 10px solid;
+            height: 30px;
+            width: 30px;
+          }
+          .triangle-left {
+            transform: rotate(135deg);
+          }
+          .triangle-right {
+            transform: rotate(-45deg);
+          }
+          #title {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 20px;
+            margin-bottom: 5px;
+          }
+          #additional-info {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 15px;
+          }
+          #input {
+            background-color: transparent;
+            outline: none;
+            border: none;
+            color: white;
+            font-size: 25px;
+            margin-top: 20px;
+            width: 100%;
+            caret-color: var(--accent-color);
+          }
+          #input::selection {
+            background: white;
+            color: black;
+          }
+        `}
+      </style>
+    </div>
+  );
+
+  const renderDataReview = () => (
+    <React.Fragment>
+      <div id="final-step">
+        <div id="final-data">
+          {Object.keys(formData)
+            .filter(e => e !== "Review your data")
+            .map(key1 => (
+              <React.Fragment key={key1}>
+                <div
+                  className={`montserrat final-step-title animation ${animationState}`}
+                >
+                  {key1}
+                </div>
+                {Object.keys(formData[key1]).map(key2 => (
+                  <div
+                    className={`montserrat animation ${animationState} delay-1`}
+                    key={key2}
+                  >
+                    <span className="final-step-key">{key2}: </span>
+                    <span className="final-step-field">
+                      {formData[key1][key2]}
+                    </span>
+                  </div>
+                ))}
+              </React.Fragment>
+            ))}
+        </div>
+        <div id="final-step-buttons">
+          <div className="montserrat final-step-button" onClick={goPrev}>
+            PREVIOUS
+          </div>
+          <div className="montserrat final-step-button">CONFIRM</div>
+        </div>
+      </div>
+      <style jsx>{`
+        #final-step {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          height: 100%;
+        }
+        #final-data {
+          overflow: scroll;
+          padding: 0 15px;
+          flex: 1;
+        }
+        .final-step-title {
+          color: var(--accent-color);
+          font-size: 30px;
+          margin: 30px 0 15px 0;
+        }
+        .final-step-field {
+          color: white;
+          font-size: 20px;
+        }
+        .final-step-key {
+          color: var(--accent-color);
+          font-size: 20px;
+        }
+        #final-step-buttons {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-top: 25px;
+          padding-bottom: 15px;
+        }
+        .final-step-button {
+          background-color: var(--accent-color);
+          color: white;
+          padding: 15px;
+          border-radius: 15px;
+          width: calc(50% - 50px);
+          height: 50px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 15px;
+          cursor: pointer;
+        }
+      `}</style>
+    </React.Fragment>
+  );
 
   return (
     <>
@@ -105,44 +367,9 @@ const Form = props => {
         <div id="steps">{props.steps.map((_, index) => renderStep(index))}</div>
         <div className="border" />
         <div id="content">
-          <div id="inner-content">
-            <div id="form-info">
-              <div
-                id="title"
-                className={`montserrat animation ${animationState}`}
-              >
-                {props.steps[currentPair.index].fields[currentPair.step].name}
-              </div>
-              {props.steps[currentPair.index].fields[currentPair.step]
-                .additionalInfo && (
-                <div
-                  id="additional-info"
-                  className={`montserrat animation delay-1 ${animationState}`}
-                >
-                  {
-                    props.steps[currentPair.index].fields[currentPair.step]
-                      .additionalInfo
-                  }
-                </div>
-              )}
-              <input
-                placeholder={
-                  props.steps[currentPair.index].fields[currentPair.step]
-                    .placeholder
-                }
-                id="input"
-                className={`montserrat animation delay-2 ${animationState}`}
-                onKeyDown={e => {
-                  if (e.key === "Enter") {
-                    goNext();
-                  }
-                }}
-              />
-            </div>
-            <div id="next-button" className="montserrat" onClick={goNext}>
-              <div id="triangle" />
-            </div>
-          </div>
+          {currentPair.index !== props.steps.length - 1
+            ? renderFormContent()
+            : renderDataReview()}
         </div>
       </div>
       <style jsx>{`
@@ -175,54 +402,9 @@ const Form = props => {
           display: flex;
           justify-content: center;
           flex-direction: column;
-          padding-left: 15px;
-          overflow: scroll;
         }
-        #inner-content {
-          display: flex;
-          align-items: center;
-        }
-        #form-info {
-          flex: 1;
-        }
-        #next-button {
-          height: 125px;
-          width: 50px;
-          background-color: var(--accent-color);
-          color: var(--background-color);
-          font-size: 30px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          padding-right: 15px;
-        }
-        #triangle {
-          border-right: 10px solid;
-          border-bottom: 10px solid;
-          height: 30px;
-          width: 30px;
-          transform: rotate(-45deg);
-        }
-        #title {
-          color: rgba(255, 255, 255, 0.75);
-          font-size: 20px;
-          margin-bottom: 5px;
-        }
-        #additional-info {
-          color: rgba(255, 255, 255, 0.5);
-          font-size: 15px;
-        }
-        #input {
-          background-color: transparent;
-          outline: none;
-          border: none;
-          color: white;
-          font-size: 25px;
-          margin-top: 20px;
-          width: 100%;
-          caret-color: var(--accent-color);
-        }
+      `}</style>
+      <style jsx global>{`
         .animation {
           position: relative;
         }

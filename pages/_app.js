@@ -36,6 +36,8 @@ export default class MyApp extends App {
           }
           * {
             box-sizing: border-box;
+          }
+          *:not(input) {
             user-select: none;
           }
           html,
@@ -43,6 +45,8 @@ export default class MyApp extends App {
           #__next {
             width: 100%;
             height: 100%;
+            margin: 0;
+            padding: 0;
           }
           body:after {
             content: "";
