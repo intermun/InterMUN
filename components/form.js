@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import WindowSizeListener from "./windowSizeListener";
 
 const Form = props => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentPair, setCurrentPair] = useState({
+    index: 0,
+    step: 0
+  });
   const [isMobile, setIsMobile] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [animationState, setAnimationState] = useState("none");
 
   useEffect(() => {
     setIsLoaded(true);
@@ -20,8 +23,7 @@ const Form = props => {
       <div
         className="step"
         onClick={() => {
-          setCurrentIndex(index);
-          setCurrentStep(0);
+          animate(index, 0);
         }}
       >
         <div className="step-number montserrat">Step {index + 1}</div>
@@ -40,14 +42,14 @@ const Form = props => {
         }
         .step-number {
           padding-bottom: 5px;
-          color: ${index === currentIndex
+          color: ${index === currentPair.index
             ? "var(--accent-color)"
             : "var(--disabled-text-color)"};
           transition: all 0.5s;
         }
         .step-text {
           opacity: 1;
-          color: ${index === currentIndex
+          color: ${index === currentPair.index
             ? "var(--text-color)"
             : "var(--disabled-text-color)"};
           transition: all 0.5s;
@@ -58,13 +60,44 @@ const Form = props => {
   );
 
   const goNext = () => {
-    if (currentStep !== props.steps[currentIndex].fields.length - 1) {
-      setCurrentStep(currentStep => currentStep + 1);
-    } else if (currentIndex !== props.steps.length - 1) {
-      setCurrentIndex(currentIndex => currentIndex + 1);
-      setCurrentStep(0);
+    animate(null, null);
+  };
+
+  const animate = (index, step) => {
+    console.log(index, step);
+    if (animationState === "none") {
+      setAnimationState("animating");
+      setTimeout(() => {
+        if (index !== null && step !== null) {
+          setCurrentPair({ index, step });
+        } else {
+          if (
+            currentPair.step !==
+            props.steps[currentPair.index].fields.length - 1
+          ) {
+            setCurrentPair(currentPair => ({
+              index: currentPair.index,
+              step: currentPair.step + 1
+            }));
+          } else if (currentPair.index !== props.steps.length - 1) {
+            setCurrentPair(currentPair => ({
+              index: currentPair.index + 1,
+              step: 0
+            }));
+          }
+        }
+        setAnimationState("reverting");
+      }, 800);
     }
   };
+
+  useEffect(() => {
+    if (animationState === "reverting") {
+      setTimeout(() => {
+        setAnimationState("none");
+      }, 800);
+    }
+  }, [animationState]);
 
   return (
     <>
@@ -74,20 +107,31 @@ const Form = props => {
         <div id="content">
           <div id="inner-content">
             <div id="form-info">
-              <div id="title" className="montserrat">
-                {props.steps[currentIndex].fields[currentStep].name}
+              <div
+                id="title"
+                className={`montserrat animation ${animationState}`}
+              >
+                {props.steps[currentPair.index].fields[currentPair.step].name}
               </div>
-              {props.steps[currentIndex].fields[currentStep].additionalInfo && (
-                <div id="additional-info" className="montserrat">
-                  {props.steps[currentIndex].fields[currentStep].additionalInfo}
+              {props.steps[currentPair.index].fields[currentPair.step]
+                .additionalInfo && (
+                <div
+                  id="additional-info"
+                  className={`montserrat animation delay-1 ${animationState}`}
+                >
+                  {
+                    props.steps[currentPair.index].fields[currentPair.step]
+                      .additionalInfo
+                  }
                 </div>
               )}
               <input
                 placeholder={
-                  props.steps[currentIndex].fields[currentStep].placeholder
+                  props.steps[currentPair.index].fields[currentPair.step]
+                    .placeholder
                 }
                 id="input"
-                className="montserrat"
+                className={`montserrat animation delay-2 ${animationState}`}
                 onKeyDown={e => {
                   if (e.key === "Enter") {
                     goNext();
@@ -116,21 +160,22 @@ const Form = props => {
         .border {
           width: ${isLoaded
             ? `calc(
-            100% * ${currentIndex} / ${props.steps.length} + 100% /
-              ${props.steps.length} * ${currentStep + 1} /
-              ${props.steps[currentIndex].fields.length}
+            100% * ${currentPair.index} / ${props.steps.length} + 100% /
+              ${props.steps.length} * ${currentPair.step + 1} /
+              ${props.steps[currentPair.index].fields.length}
           )`
             : 0};
           height: 2px;
           background-color: var(--accent-color);
           transition: 0.5s ease all;
+          margin-top: 5px;
         }
         #content {
           flex: 1;
           display: flex;
           justify-content: center;
           flex-direction: column;
-          padding-left: 30px;
+          padding-left: 15px;
           overflow: scroll;
         }
         #inner-content {
@@ -150,6 +195,7 @@ const Form = props => {
           align-items: center;
           justify-content: center;
           cursor: pointer;
+          padding-right: 15px;
         }
         #triangle {
           border-right: 10px solid;
@@ -176,6 +222,43 @@ const Form = props => {
           margin-top: 20px;
           width: 100%;
           caret-color: var(--accent-color);
+        }
+        .animation {
+          position: relative;
+        }
+        @keyframes animating {
+          from {
+            opacity: 1;
+            top: 0;
+          }
+          to {
+            opacity: 0;
+            top: 20px;
+          }
+        }
+        @keyframes reverting {
+          from {
+            opacity: 0;
+            top: -20px;
+          }
+          to {
+            opacity: 1;
+            top: 0;
+          }
+        }
+        .animating {
+          animation: animating 0.5s forwards;
+        }
+        .reverting {
+          opacity: 0;
+          top: -20px;
+          animation: reverting 0.5s forwards;
+        }
+        .delay-1 {
+          animation-delay: 0.15s;
+        }
+        .delay-2 {
+          animation-delay: 0.3s;
         }
       `}</style>
     </>

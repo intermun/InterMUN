@@ -36,6 +36,7 @@ export default class MyApp extends App {
           }
           * {
             box-sizing: border-box;
+            user-select: none;
           }
           html,
           body,
