@@ -1,22 +1,190 @@
 import React, { useState, useEffect, useRef } from "react";
 import WindowSizeListener from "./windowSizeListener";
+import I18n from "../i18n/i18n";
 
 const Form = props => {
   const [currentPair, setCurrentPair] = useState({
-    index: 0,
-    step: 0
+    step: 0,
+    field: 0
   });
   const [isMobile, setIsMobile] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [animationState, setAnimationState] = useState("none");
+  const [errorAnimationState, setErrorAnimationState] = useState("error-none");
   const [inputValue, setInputValue] = useState("");
   const [formData, setFormData] = useState({});
+  const [showError, setShowError] = useState(false);
 
   const inputRef = useRef(null);
 
   useEffect(() => {
     setIsLoaded(true);
   }, []);
+
+  useEffect(() => {
+    const _formData = Object.assign({}, formData);
+    assign(
+      _formData,
+      [getCurrentStep().name, getCurrentField().id],
+      inputValue
+    );
+    setFormData(_formData);
+  }, [inputValue]);
+
+  useEffect(() => {
+    if (animationState === "reverting") {
+      setTimeout(() => {
+        setAnimationState("none");
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 800);
+    }
+  }, [animationState]);
+
+  useEffect(() => {
+    const subscript = subscriptFormData(currentPair.step, currentPair.field);
+    setInputValue(subscript || "");
+  }, [currentPair]);
+
+  const getStep = step => {
+    return props.steps[step];
+  };
+
+  const getCurrentStep = () => {
+    return props.steps[currentPair.step];
+  };
+
+  const getField = (step, field) => {
+    return props.steps[step].fields[field];
+  };
+
+  const getCurrentField = () => {
+    return getField(currentPair.step, currentPair.field);
+  };
+
+  const assign = (obj, keyPath, value) => {
+    const lastKeyIndex = keyPath.length - 1;
+    for (let i = 0; i < lastKeyIndex; ++i) {
+      const key = keyPath[i];
+      if (!(key in obj)) {
+        obj[key] = {};
+      }
+      obj = obj[key];
+    }
+    obj[keyPath[lastKeyIndex]] = value;
+  };
+
+  const subscriptFormData = (step, field) => {
+    const firstPair = formData[getStep(step).name];
+    if (firstPair) {
+      return formData[getStep(step).name][getField(step, field).id];
+    }
+    return undefined;
+  };
+
+  const goNext = () => {
+    if (
+      subscriptFormData(currentPair.step, currentPair.field).trim() === "" &&
+      getCurrentField().required
+    ) {
+      animateError();
+      return;
+    }
+    if (
+      getCurrentField().regex &&
+      !getCurrentField().regex.test(
+        subscriptFormData(currentPair.step, currentPair.field).trim()
+      )
+    ) {
+      setShowError(true);
+      setTimeout(() => {
+        setShowError(false);
+      }, 2000);
+      return;
+    }
+    animate("next", "next");
+  };
+
+  const goPrev = () => {
+    animate("prev", "prev");
+  };
+
+  const jumpTo = (index, step) => {
+    if (index === currentPair.step && step === currentPair.field) {
+      return;
+    }
+    if (
+      (index > currentPair.step ||
+        (index === currentPair.step && step > currentPair.field)) &&
+      subscriptFormData(currentPair.step, currentPair.field).trim() === "" &&
+      getCurrentField().required
+    ) {
+      animateError();
+      return;
+    }
+    if (
+      (index > currentPair.step ||
+        (index === currentPair.step && step > currentPair.field)) &&
+      getCurrentField().regex &&
+      !getCurrentField().regex.test(
+        subscriptFormData(currentPair.step, currentPair.field).trim()
+      )
+    ) {
+      setShowError(true);
+      setTimeout(() => {
+        setShowError(false);
+      }, 2000);
+      return;
+    }
+    animate(index, 0);
+  };
+
+  const animateError = () => {
+    setErrorAnimationState("error-animating");
+    setTimeout(() => {
+      setErrorAnimationState("error-none");
+    }, 1000);
+  };
+
+  const animate = (index, step) => {
+    if (
+      animationState === "none" &&
+      !(currentPair.step === 0 && currentPair.field === 0 && index === "prev")
+    ) {
+      setAnimationState("animating");
+      setTimeout(() => {
+        if (typeof index === "number" && typeof step === "number") {
+          setCurrentPair({ step: index, field: step });
+        } else if (index === "next" && step === "next") {
+          if (currentPair.field !== getCurrentStep().fields.length - 1) {
+            setCurrentPair(currentPair => ({
+              step: currentPair.step,
+              field: currentPair.field + 1
+            }));
+          } else if (currentPair.step !== props.steps.length - 1) {
+            setCurrentPair(currentPair => ({
+              step: currentPair.step + 1,
+              field: 0
+            }));
+          }
+        } else if (index === "prev" && step === "prev") {
+          if (currentPair.field !== 0) {
+            setCurrentPair(currentPair => ({
+              step: currentPair.step,
+              field: currentPair.field - 1
+            }));
+          } else if (currentPair.step !== 0) {
+            setCurrentPair(currentPair => ({
+              step: currentPair.step - 1,
+              field: getStep(currentPair.step - 1).fields.length - 1
+            }));
+          }
+        }
+        setAnimationState("reverting");
+      }, 800);
+    }
+  };
 
   const renderStep = index => (
     <React.Fragment key={`step-${index}`}>
@@ -27,11 +195,11 @@ const Form = props => {
       <div
         className="step"
         onClick={() => {
-          animate(index, 0);
+          jumpTo(index, 0);
         }}
       >
         <div className="step-number montserrat">Step {index + 1}</div>
-        <div className="step-text montserrat">{props.steps[index].name}</div>
+        <div className="step-text montserrat">{getStep(index).name}</div>
       </div>
       <style jsx>{`
         .step {
@@ -46,14 +214,14 @@ const Form = props => {
         }
         .step-number {
           padding-bottom: 5px;
-          color: ${index === currentPair.index
+          color: ${index === currentPair.step
             ? "var(--accent-color)"
             : "var(--disabled-text-color)"};
           transition: all 0.5s;
         }
         .step-text {
           opacity: 1;
-          color: ${index === currentPair.index
+          color: ${index === currentPair.step
             ? "var(--text-color)"
             : "var(--disabled-text-color)"};
           transition: all 0.5s;
@@ -63,114 +231,6 @@ const Form = props => {
     </React.Fragment>
   );
 
-  const assign = (obj, keyPath, value) => {
-    const lastKeyIndex = keyPath.length - 1;
-    for (let i = 0; i < lastKeyIndex; ++i) {
-      const key = keyPath[i];
-      if (!(key in obj)) {
-        obj[key] = {};
-      }
-      obj = obj[key];
-    }
-    obj[keyPath[lastKeyIndex]] = value;
-  };
-
-  const subscriptFormData = (index, step) => {
-    const firstPair = formData[props.steps[index].name];
-    if (firstPair) {
-      return formData[props.steps[index].name][
-        props.steps[index].fields[step].placeholder
-      ];
-    }
-    return undefined;
-  };
-
-  const goNext = () => {
-    const _formData = Object.assign({}, formData);
-    assign(
-      _formData,
-      [
-        props.steps[currentPair.index].name,
-        props.steps[currentPair.index].fields[currentPair.step].placeholder
-      ],
-      inputValue
-    );
-    setFormData(_formData);
-    animate("next", "next");
-  };
-
-  const goPrev = () => {
-    const _formData = Object.assign({}, formData);
-    assign(
-      _formData,
-      [
-        props.steps[currentPair.index].name,
-        props.steps[currentPair.index].fields[currentPair.step].placeholder
-      ],
-      inputValue
-    );
-    setFormData(_formData);
-    animate("prev", "prev");
-  };
-
-  const animate = (index, step) => {
-    if (
-      animationState === "none" &&
-      !(currentPair.index === 0 && currentPair.step === 0 && index === "prev")
-    ) {
-      setAnimationState("animating");
-      setTimeout(() => {
-        if (typeof index === "number" && typeof step === "number") {
-          setCurrentPair({ index, step });
-        } else if (index === "next" && step === "next") {
-          if (
-            currentPair.step !==
-            props.steps[currentPair.index].fields.length - 1
-          ) {
-            setCurrentPair(currentPair => ({
-              index: currentPair.index,
-              step: currentPair.step + 1
-            }));
-          } else if (currentPair.index !== props.steps.length - 1) {
-            setCurrentPair(currentPair => ({
-              index: currentPair.index + 1,
-              step: 0
-            }));
-          }
-        } else if (index === "prev" && step === "prev") {
-          if (currentPair.step !== 0) {
-            setCurrentPair(currentPair => ({
-              index: currentPair.index,
-              step: currentPair.step - 1
-            }));
-          } else if (currentPair.index !== 0) {
-            setCurrentPair(currentPair => ({
-              index: currentPair.index - 1,
-              step: props.steps[currentPair.index - 1].fields.length - 1
-            }));
-          }
-        }
-        setAnimationState("reverting");
-      }, 800);
-    }
-  };
-
-  useEffect(() => {
-    if (animationState === "reverting") {
-      setTimeout(() => {
-        setAnimationState("none");
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }, 800);
-    }
-  }, [animationState]);
-
-  useEffect(() => {
-    const subscript = subscriptFormData(currentPair.index, currentPair.step);
-    setInputValue(subscript || "");
-  }, [currentPair]);
-
   const renderFormContent = () => (
     <div id="inner-content">
       <div className="form-button left-button" onClick={goPrev}>
@@ -178,25 +238,19 @@ const Form = props => {
       </div>
       <div id="form-info">
         <div id="title" className={`montserrat animation ${animationState}`}>
-          {props.steps[currentPair.index].fields[currentPair.step].name}
+          {getCurrentField().name}
         </div>
-        {props.steps[currentPair.index].fields[currentPair.step]
-          .additionalInfo && (
+        {getCurrentField().required && (
           <div
             id="additional-info"
-            className={`montserrat animation delay-1 ${animationState}`}
+            className={`montserrat animation delay-1 ${animationState} ${errorAnimationState}`}
           >
-            {
-              props.steps[currentPair.index].fields[currentPair.step]
-                .additionalInfo
-            }
+            Required
           </div>
         )}
         <input
           ref={inputRef}
-          placeholder={
-            props.steps[currentPair.index].fields[currentPair.step].placeholder
-          }
+          placeholder={getCurrentField().placeholder}
           id="input"
           className={`montserrat animation delay-2 ${animationState}`}
           onKeyDown={e => {
@@ -207,6 +261,11 @@ const Form = props => {
           value={inputValue}
           onChange={event => setInputValue(event.target.value)}
         />
+        {showError && getCurrentField().errorText !== undefined && (
+          <div id="error-text" className="montserrat">
+            {getCurrentField().errorText}
+          </div>
+        )}
       </div>
       <div className="form-button right-button" onClick={goNext}>
         <div className="triangle triangle-right" />
@@ -273,6 +332,67 @@ const Form = props => {
             background: white;
             color: black;
           }
+          #error-text {
+            animation: errorAnimatingAndDisappearing 2s ease-in-out forwards;
+          }
+          .error-animating {
+            animation: errorAnimating 1s ease-in-out forwards, shake 1s forwards;
+          }
+          @keyframes errorAnimatingAndDisappearing {
+            0% {
+              height: 0;
+              opacity: 0;
+              color: rgba(255, 255, 255, 0.5);
+            }
+            25% {
+              height: 20px;
+              opacity: 1;
+              color: red;
+            }
+            75% {
+              height: 20px;
+              opacity: 1;
+              color: red;
+            }
+            100% {
+              height: 0;
+              opacity: 0;
+              color: rgba(255, 255, 255, 0.5);
+            }
+          }
+          @keyframes errorAnimating {
+            0% {
+              color: rgba(255, 255, 255, 0.5);
+            }
+            50% {
+              color: red;
+            }
+            100% {
+              color: rgba(255, 255, 255, 0.5);
+            }
+          }
+          @keyframes shake {
+            10%,
+            90% {
+              transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+              transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+              transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+              transform: translate3d(4px, 0, 0);
+            }
+          }
         `}
       </style>
     </div>
@@ -296,7 +416,7 @@ const Form = props => {
                     className={`montserrat animation ${animationState} delay-1`}
                     key={key2}
                   >
-                    <span className="final-step-key">{key2}: </span>
+                    <span className="final-step-key">{I18n.t(key2)}: </span>
                     <span className="final-step-field">
                       {formData[key1][key2]}
                     </span>
@@ -367,7 +487,7 @@ const Form = props => {
         <div id="steps">{props.steps.map((_, index) => renderStep(index))}</div>
         <div className="border" />
         <div id="content">
-          {currentPair.index !== props.steps.length - 1
+          {currentPair.step !== props.steps.length - 1
             ? renderFormContent()
             : renderDataReview()}
         </div>
@@ -387,9 +507,9 @@ const Form = props => {
         .border {
           width: ${isLoaded
             ? `calc(
-            100% * ${currentPair.index} / ${props.steps.length} + 100% /
-              ${props.steps.length} * ${currentPair.step + 1} /
-              ${props.steps[currentPair.index].fields.length}
+            100% * ${currentPair.step} / ${props.steps.length} + 100% /
+              ${props.steps.length} * ${currentPair.field + 1} /
+              ${getCurrentStep().fields.length}
           )`
             : 0};
           height: 2px;

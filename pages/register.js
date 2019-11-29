@@ -5,22 +5,27 @@ const _steps = [
     name: "Personal information",
     fields: [
       {
+        id: "fullName",
         placeholder: "Full name",
         type: "normal",
-        additionalInfo: "Required",
-        name: "What is your full name?"
+        required: true,
+        name: "What is your full name?",
+        regex: RegExp(String.raw`[^\d]+`),
+        errorText: "Name should only contain letters"
       },
       {
-        name: "What is your high school",
+        id: "highSchool",
+        name: "What is your high school?",
         type: "normal",
         placeholder: "High school",
-        additionalInfo: "Required"
+        required: true
       },
       {
+        id: "email",
         name: "What is your email?",
         type: "normal",
         placeholder: "Email",
-        additionalInfo: "Required"
+        required: true
       }
     ]
   },
@@ -28,6 +33,7 @@ const _steps = [
     name: "Committee",
     fields: [
       {
+        id: "committee",
         name: "Select committee",
         type: "select",
         placeholder: "Committee"
@@ -38,6 +44,7 @@ const _steps = [
     name: "Country",
     fields: [
       {
+        id: "country",
         name: "Select country",
         type: "select",
         placeholder: "Country"
