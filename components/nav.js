@@ -32,7 +32,7 @@ const _menuItems = [
   }
 ];
 
-const Nav = () => {
+const Nav = React.forwardRef((props, navRef) => {
   const [menuItems, setMenuItems] = useState([]);
   const [menuState, setMenuState] = useState("closed");
 
@@ -63,7 +63,7 @@ const Nav = () => {
   };
 
   return (
-    <div id="nav">
+    <div id="nav" ref={navRef}>
       <WindowSizeListener
         onBecomeMobile={() => {
           setMenuItems(_sortBy(_menuItems, ["index"]));
@@ -131,6 +131,7 @@ const Nav = () => {
           opacity: 1;
           width: 75px;
           height: 75px;
+          cursor: pointer;
         }
         .nav-item {
           width: 100px;
@@ -202,6 +203,6 @@ const Nav = () => {
       `}</style>
     </div>
   );
-};
+});
 
 export default Nav;

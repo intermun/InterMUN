@@ -10,7 +10,7 @@ const _steps = [
         type: "normal",
         required: true,
         name: "What is your full name?",
-        regex: RegExp(String.raw`[^\d]+`),
+        regex: /[^\d]+/,
         errorText: "Name should only contain letters"
       },
       {

@@ -5,6 +5,8 @@ import Head from "next/head";
 import { PageTransition } from "next-page-transitions";
 
 export default class MyApp extends App {
+  navRef = React.createRef();
+
   render() {
     const { Component, pageProps, router } = this.props;
     return (
@@ -23,9 +25,9 @@ export default class MyApp extends App {
             crossOrigin="anonymous"
           ></link>
         </Head>
-        <Nav />
+        <Nav ref={this.navRef} />
         <PageTransition timeout={300} classNames="page-transition">
-          <Component {...pageProps} key={router.route} />
+          <Component {...pageProps} navRef={this.navRef} key={router.route} />
         </PageTransition>
         <style jsx global>{`
           :root {
@@ -47,6 +49,7 @@ export default class MyApp extends App {
             height: 100%;
             margin: 0;
             padding: 0;
+            overflow: hidden;
           }
           body:after {
             content: "";
