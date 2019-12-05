@@ -30,6 +30,9 @@ export default class MyApp extends App {
           <Component {...pageProps} navRef={this.navRef} key={router.route} />
         </PageTransition>
         <style jsx global>{`
+          ::-webkit-scrollbar {
+            display: none;
+          }
           :root {
             --accent-color: #0d6cf6;
             --background-color: #16151b;

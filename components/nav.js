@@ -151,10 +151,6 @@ const Nav = React.forwardRef((props, navRef) => {
             padding: 15px 0 0 15px;
             flex-direction: column;
           }
-          #logo {
-            width: 50px;
-            height: 50px;
-          }
           .nav-item {
             justify-content: start;
             overflow: hidden;

@@ -2,6 +2,8 @@ import React from "react";
 
 const Home = props => {
   const isScrollingAllowed = React.useRef(true);
+  const start = React.useRef(0);
+
   const [, updateState] = React.useState();
   const forceUpdate = React.useCallback(() => updateState({}), []);
   const [pageAnimation, setPageAnimation] = React.useState("");
@@ -21,8 +23,7 @@ const Home = props => {
       setPageAnimation("previousPageAnimating");
       setTimeout(() => {
         setCurrentPageIndex(currentPageIndex => currentPageIndex - 1);
-        setPageAnimation("");
-      }, 500);
+      }, 1000);
     }
   };
 
@@ -32,15 +33,23 @@ const Home = props => {
       setPageAnimation("nextPageAnimating");
       setTimeout(() => {
         setCurrentPageIndex(currentPageIndex => currentPageIndex + 1);
-        setPageAnimation("");
-      }, 500);
+      }, 1000);
     }
   };
 
   const getNavHeight = () =>
     props.navRef.current !== null ? props.navRef.current.offsetHeight : 0;
 
-  const onHomeScroll = event => {
+  const onTouchStart = event => {
+    start.current = event.changedTouches[0];
+  };
+
+  const onTouchEnd = event => {
+    const end = event.changedTouches[0];
+    end.screenY > start.current.screenY ? onUpScroll() : onDownScroll();
+  };
+
+  const onWheel = event => {
     if (isScrollingAllowed.current) {
       event.deltaY < 0 ? onUpScroll() : onDownScroll();
     }
@@ -74,9 +83,15 @@ const Home = props => {
 
   return (
     <>
-      <div id="scroll-overlay" onWheel={onHomeScroll} />
-      <div id="home" className={pageAnimation}>
-        {pages.map(_ => _)}
+      <div
+        id="home"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        onWheel={onWheel}
+      >
+        <div id="pages" className={pageAnimation}>
+          {pages.map(_ => _)}
+        </div>
         <style jsx global>{`
           #scroll-overlay {
             position: fixed;
@@ -88,19 +103,24 @@ const Home = props => {
           #home {
             width: 100%;
             height: 100%;
+            overflow: hidden;
+          }
+          .nextPageAnimating {
+            animation: nextPage 1s cubic-bezier(0.825, 0.27, 0.895, 0.355)
+              forwards;
+          }
+          .previousPageAnimating {
+            animation: previousPage 1s cubic-bezier(0.825, 0.27, 0.895, 0.355)
+              forwards;
+          }
+          .page {
+            height: calc(100vh - ${getNavHeight()}px);
+            width: 100%;
+          }
+          #pages {
             margin-top: calc(
               -1 * ${currentPageIndex} * (100vh - ${getNavHeight()}px)
             );
-          }
-          .nextPageAnimating {
-            animation: nextPage 0.5s cubic-bezier(0.825, 0.27, 0.895, 0.355);
-          }
-          .previousPageAnimating {
-            animation: previousPage 0.5s cubic-bezier(0.825, 0.27, 0.895, 0.355);
-          }
-          .page {
-            height: 100%;
-            width: 100%;
           }
           @keyframes nextPage {
             from {
