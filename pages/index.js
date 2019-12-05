@@ -46,7 +46,9 @@ const Home = props => {
 
   const onTouchEnd = event => {
     const end = event.changedTouches[0];
-    end.screenY > start.current.screenY ? onUpScroll() : onDownScroll();
+    if (isScrollingAllowed.current) {
+      end.screenY > start.current.screenY ? onUpScroll() : onDownScroll();
+    }
   };
 
   const onWheel = event => {
