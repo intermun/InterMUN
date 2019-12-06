@@ -1,21 +1,34 @@
 import React, { useState, useEffect, useRef } from "react";
 import WindowSizeListener from "./windowSizeListener";
 import I18n from "../i18n/i18n";
+import { NextPage } from "next";
+import { Step, StepField } from "../pages/register";
 
-const Form = props => {
-  const [currentPair, setCurrentPair] = useState({
+type FormData = {
+  [key: string]: {
+    [key: string]: string;
+  };
+};
+
+const Form: NextPage<{ steps: Step[] }> = props => {
+  const [currentPair, setCurrentPair] = useState<{
+    step: number;
+    field: number;
+  }>({
     step: 0,
     field: 0
   });
-  const [isMobile, setIsMobile] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [animationState, setAnimationState] = useState("none");
-  const [errorAnimationState, setErrorAnimationState] = useState("error-none");
-  const [inputValue, setInputValue] = useState("");
-  const [formData, setFormData] = useState({});
-  const [showError, setShowError] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
+  const [animationState, setAnimationState] = useState<string>("none");
+  const [errorAnimationState, setErrorAnimationState] = useState<string>(
+    "error-none"
+  );
+  const [inputValue, setInputValue] = useState<string>("");
+  const [formData, setFormData] = useState<FormData>({});
+  const [showError, setShowError] = useState<boolean>(false);
 
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -25,7 +38,7 @@ const Form = props => {
     const _formData = Object.assign({}, formData);
     assign(
       _formData,
-      [getCurrentStep().name, getCurrentField().id],
+      { stepName: getCurrentStep().name, fieldId: getCurrentField().id },
       inputValue
     );
     setFormData(_formData);
@@ -47,55 +60,58 @@ const Form = props => {
     setInputValue(subscript || "");
   }, [currentPair]);
 
-  const getStep = step => {
+  const getStep = (step: number): Step => {
     return props.steps[step];
   };
 
-  const getCurrentStep = () => {
+  const getCurrentStep = (): Step => {
     return props.steps[currentPair.step];
   };
 
-  const getField = (step, field) => {
+  const getField = (step: number, field: number): StepField => {
     return props.steps[step].fields[field];
   };
 
-  const getCurrentField = () => {
+  const getCurrentField = (): StepField => {
     return getField(currentPair.step, currentPair.field);
   };
 
-  const assign = (obj, keyPath, value) => {
-    const lastKeyIndex = keyPath.length - 1;
-    for (let i = 0; i < lastKeyIndex; ++i) {
-      const key = keyPath[i];
-      if (!(key in obj)) {
-        obj[key] = {};
-      }
-      obj = obj[key];
+  const assign = (
+    obj: FormData,
+    keys: { stepName: string; fieldId: string },
+    value: string
+  ): void => {
+    if (obj[keys.stepName] === undefined) {
+      obj[keys.stepName] = {};
     }
-    obj[keyPath[lastKeyIndex]] = value;
+    obj[keys.stepName][keys.fieldId] = value;
   };
 
-  const subscriptFormData = (step, field) => {
-    const firstPair = formData[getStep(step).name];
-    if (firstPair) {
-      return formData[getStep(step).name][getField(step, field).id];
+  const subscriptFormData = (
+    step: number,
+    field: number
+  ): string | undefined => {
+    if (formData[getStep(step).name] === undefined) {
+      return undefined;
     }
-    return undefined;
+    return formData[getStep(step).name][getField(step, field).id];
   };
 
-  const goNext = () => {
+  const goNext = (): void => {
     if (
-      subscriptFormData(currentPair.step, currentPair.field).trim() === "" &&
+      subscriptFormData(currentPair.step, currentPair.field)?.trim() === "" &&
       getCurrentField().required
     ) {
       animateError();
       return;
     }
+    const toTest = subscriptFormData(
+      currentPair.step,
+      currentPair.field
+    )?.trim();
     if (
-      getCurrentField().regex &&
-      !getCurrentField().regex.test(
-        subscriptFormData(currentPair.step, currentPair.field).trim()
-      )
+      toTest !== undefined &&
+      getCurrentField().regex?.test(toTest) === false
     ) {
       setShowError(true);
       setTimeout(() => {
@@ -106,30 +122,32 @@ const Form = props => {
     animate("next", "next");
   };
 
-  const goPrev = () => {
+  const goPrev = (): void => {
     animate("prev", "prev");
   };
 
-  const jumpTo = (index, step) => {
+  const jumpTo = (index: number, step: number): void => {
     if (index === currentPair.step && step === currentPair.field) {
       return;
     }
     if (
       (index > currentPair.step ||
         (index === currentPair.step && step > currentPair.field)) &&
-      subscriptFormData(currentPair.step, currentPair.field).trim() === "" &&
+      subscriptFormData(currentPair.step, currentPair.field)?.trim() === "" &&
       getCurrentField().required
     ) {
       animateError();
       return;
     }
+    const toTest = subscriptFormData(
+      currentPair.step,
+      currentPair.field
+    )?.trim();
     if (
       (index > currentPair.step ||
         (index === currentPair.step && step > currentPair.field)) &&
-      getCurrentField().regex &&
-      !getCurrentField().regex.test(
-        subscriptFormData(currentPair.step, currentPair.field).trim()
-      )
+      toTest !== undefined &&
+      getCurrentField().regex?.test(toTest) === false
     ) {
       setShowError(true);
       setTimeout(() => {
@@ -140,14 +158,14 @@ const Form = props => {
     animate(index, 0);
   };
 
-  const animateError = () => {
+  const animateError = (): void => {
     setErrorAnimationState("error-animating");
     setTimeout(() => {
       setErrorAnimationState("error-none");
     }, 1000);
   };
 
-  const animate = (index, step) => {
+  const animate = (index: number | string, step: number | string): void => {
     if (
       animationState === "none" &&
       !(currentPair.step === 0 && currentPair.field === 0 && index === "prev")
@@ -186,7 +204,7 @@ const Form = props => {
     }
   };
 
-  const renderStep = index => (
+  const renderStep = (index: number): JSX.Element => (
     <React.Fragment key={`step-${index}`}>
       <WindowSizeListener
         onBecomeMobile={() => setIsMobile(true)}
@@ -231,7 +249,7 @@ const Form = props => {
     </React.Fragment>
   );
 
-  const renderFormContent = () => (
+  const renderFormContent = (): JSX.Element => (
     <div id="inner-content">
       <div className="form-button left-button" onClick={goPrev}>
         <div className="triangle triangle-left" />
@@ -398,7 +416,7 @@ const Form = props => {
     </div>
   );
 
-  const renderDataReview = () => (
+  const renderDataReview = (): JSX.Element => (
     <React.Fragment>
       <div id="final-step">
         <div id="final-data">

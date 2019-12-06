@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 
-const WindowSizeListener = props => {
-  const [width, setWidth] = useState(0);
+const WindowSizeListener = (props: {
+  onBecomeMobile: () => void;
+  onBecomeDesktop: () => void;
+}) => {
+  const [width, setWidth] = useState<number>(0);
 
   useEffect(() => {
     const handleResize = () => {

@@ -4,7 +4,14 @@ import Link from "next/link";
 import Router from "next/router";
 import WindowSizeListener from "./windowSizeListener";
 
-const _menuItems = [
+type MenuItem = {
+  href: string;
+  text?: string;
+  src?: string;
+  index: number;
+};
+
+const _menuItems: MenuItem[] = [
   {
     href: "/about",
     text: "About",
@@ -32,11 +39,11 @@ const _menuItems = [
   }
 ];
 
-const Nav = React.forwardRef((props, navRef) => {
-  const [menuItems, setMenuItems] = useState([]);
-  const [menuState, setMenuState] = useState("closed");
+const Nav = React.forwardRef<HTMLDivElement, any>((props, navRef) => {
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [menuState, setMenuState] = useState<string>("closed");
 
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
     const handleRouteChange = () => {

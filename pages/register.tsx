@@ -1,6 +1,21 @@
 import Form from "../components/form";
 
-const _steps = [
+export type StepField = {
+  id: string;
+  name: string;
+  placeholder: string;
+  type: string;
+  required: boolean;
+  regex?: RegExp;
+  errorText?: string;
+};
+
+export type Step = {
+  name: string;
+  fields: StepField[];
+};
+
+const _steps: Step[] = [
   {
     name: "Personal information",
     fields: [
@@ -36,7 +51,8 @@ const _steps = [
         id: "committee",
         name: "Select committee",
         type: "select",
-        placeholder: "Committee"
+        placeholder: "Committee",
+        required: false
       }
     ]
   },
@@ -47,7 +63,8 @@ const _steps = [
         id: "country",
         name: "Select country",
         type: "select",
-        placeholder: "Country"
+        placeholder: "Country",
+        required: false
       }
     ]
   },
@@ -55,8 +72,11 @@ const _steps = [
     name: "Review your data",
     fields: [
       {
+        id: "",
         name: "Review your data",
-        type: "review"
+        type: "review",
+        required: true,
+        placeholder: ""
       }
     ]
   }

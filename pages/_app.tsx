@@ -5,7 +5,7 @@ import Head from "next/head";
 import { PageTransition } from "next-page-transitions";
 
 export default class MyApp extends App {
-  navRef = React.createRef();
+  navRef = React.createRef<HTMLDivElement>();
 
   render() {
     const { Component, pageProps, router } = this.props;
@@ -13,7 +13,7 @@ export default class MyApp extends App {
       <>
         <Head>
           <title>Home</title>
-          <link rel="icon" href="/static/favicon.ico" importance="low" />
+          <link rel="icon" href="/static/favicon.ico" />
           <link
             href="https://fonts.googleapis.com/css?family=Montserrat:600&display=swap"
             rel="stylesheet"
