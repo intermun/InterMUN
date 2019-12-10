@@ -13,7 +13,7 @@ export default class MyApp extends App {
       <>
         <Head>
           <title>Home</title>
-          <link rel="icon" href="/static/favicon.ico" />
+          <link rel="icon" href="/favicon.ico" />
           <link
             href="https://fonts.googleapis.com/css?family=Montserrat:600&display=swap"
             rel="stylesheet"

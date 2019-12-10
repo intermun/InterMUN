@@ -24,7 +24,7 @@ const _menuItems: MenuItem[] = [
   },
   {
     href: "/",
-    src: "/static/logo.svg",
+    src: "/logo.svg",
     index: -1
   },
   {

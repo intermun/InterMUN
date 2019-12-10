@@ -1,13 +1,14 @@
 import React from "react";
+import { NextPage } from "next";
 
-const Home = props => {
-  const isScrollingAllowed = React.useRef(true);
-  const start = React.useRef(0);
+const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
+  const isScrollingAllowed = React.useRef<boolean>(true);
+  const start = React.useRef<React.Touch | null>(null);
 
   const [, updateState] = React.useState();
   const forceUpdate = React.useCallback(() => updateState({}), []);
-  const [pageAnimation, setPageAnimation] = React.useState("");
-  const [currentPageIndex, setCurrentPageIndex] = React.useState(0);
+  const [pageAnimation, setPageAnimation] = React.useState<string>("");
+  const [currentPageIndex, setCurrentPageIndex] = React.useState<number>(0);
 
   React.useEffect(() => forceUpdate(), []);
   React.useEffect(() => setPageAnimation(""), [currentPageIndex]);
@@ -37,21 +38,22 @@ const Home = props => {
     }
   };
 
-  const getNavHeight = () =>
-    props.navRef.current !== null ? props.navRef.current.offsetHeight : 0;
+  const getNavHeight = () => {
+    return props.navRef.current?.offsetHeight ?? 0;
+  };
 
-  const onTouchStart = event => {
+  const onTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
     start.current = event.changedTouches[0];
   };
 
-  const onTouchEnd = event => {
+  const onTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
     const end = event.changedTouches[0];
-    if (isScrollingAllowed.current) {
+    if (isScrollingAllowed.current && start.current) {
       end.screenY > start.current.screenY ? onUpScroll() : onDownScroll();
     }
   };
 
-  const onWheel = event => {
+  const onWheel = (event: React.WheelEvent<HTMLDivElement>) => {
     if (isScrollingAllowed.current) {
       event.deltaY < 0 ? onUpScroll() : onDownScroll();
     }
