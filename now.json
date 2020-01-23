@@ -1,5 +1,4 @@
 {
-  "alias": "intermun.org",
   "env": {
     "firebase_api_key": "@firebase_api_key",
     "firebase_auth_domain": "@firebase_auth_domain",
