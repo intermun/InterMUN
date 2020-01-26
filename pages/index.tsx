@@ -1,6 +1,25 @@
 import React from "react";
 import { NextPage } from "next";
 
+type SubPage = {
+  backgroundColor: string;
+  key: string;
+  content: JSX.Element;
+};
+
+const pages: SubPage[] = [
+  {
+    backgroundColor: "green",
+    key: "page1",
+    content: <>Page 1</>
+  },
+  {
+    backgroundColor: "blue",
+    key: "page2",
+    content: <>Page 2</>
+  }
+];
+
 const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
   const isScrollingAllowed = React.useRef<boolean>(true);
   const start = React.useRef<React.Touch | null>(null);
@@ -9,6 +28,8 @@ const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
   const forceUpdate = React.useCallback(() => updateState({}), []);
   const [pageAnimation, setPageAnimation] = React.useState<string>("");
   const [currentPageIndex, setCurrentPageIndex] = React.useState<number>(0);
+  // prettier-ignore
+  const [currentBackgroundColor, setCurrentBackgroundColor] = React.useState<string>(pages[0].backgroundColor);
 
   React.useEffect(() => forceUpdate(), []);
   React.useEffect(() => setPageAnimation(""), [currentPageIndex]);
@@ -21,20 +42,26 @@ const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
   const onUpScroll = () => {
     if (currentPageIndex !== 0) {
       isScrollingAllowed.current = false;
-      setPageAnimation("previousPageAnimating");
+      setCurrentBackgroundColor(pages[currentPageIndex - 1].backgroundColor);
       setTimeout(() => {
-        setCurrentPageIndex(currentPageIndex => currentPageIndex - 1);
-      }, 1000);
+        setPageAnimation("previousPageAnimating");
+        setTimeout(() => {
+          setCurrentPageIndex(currentPageIndex => currentPageIndex - 1);
+        }, 1000);
+      }, 250);
     }
   };
 
   const onDownScroll = () => {
     if (currentPageIndex !== pages.length - 1) {
       isScrollingAllowed.current = false;
-      setPageAnimation("nextPageAnimating");
+      setCurrentBackgroundColor(pages[currentPageIndex + 1].backgroundColor);
       setTimeout(() => {
-        setCurrentPageIndex(currentPageIndex => currentPageIndex + 1);
-      }, 1000);
+        setPageAnimation("nextPageAnimating");
+        setTimeout(() => {
+          setCurrentPageIndex(currentPageIndex => currentPageIndex + 1);
+        }, 1000);
+      }, 250);
     }
   };
 
@@ -59,32 +86,6 @@ const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
     }
   };
 
-  const renderHomePage = () => {
-    return (
-      <div className="page" key="homePage" id="page1">
-        <style jsx>{`
-          #page1 {
-            background-color: green;
-          }
-        `}</style>
-      </div>
-    );
-  };
-
-  const renderInfoPage = () => {
-    return (
-      <div className="page" key="infoPage" id="page2">
-        <style jsx>{`
-          #page2 {
-            background-color: blue;
-          }
-        `}</style>
-      </div>
-    );
-  };
-
-  const pages = [renderHomePage(), renderInfoPage()];
-
   return (
     <>
       <div
@@ -93,8 +94,12 @@ const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
         onTouchEnd={onTouchEnd}
         onWheel={onWheel}
       >
-        <div id="pages" className={pageAnimation}>
-          {pages.map(_ => _)}
+        <div id="pages" className={`${pageAnimation} pages`}>
+          {pages.map((e: SubPage) => (
+            <div className="page" key={e.key}>
+              {e.content}
+            </div>
+          ))}
         </div>
         <style jsx global>{`
           #scroll-overlay {
@@ -110,16 +115,24 @@ const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
             overflow: hidden;
           }
           .nextPageAnimating {
-            animation: nextPage 1s cubic-bezier(0.825, 0.27, 0.895, 0.355)
+            animation: nextPage 0.5s cubic-bezier(0.825, 0.27, 0.895, 0.355)
               forwards;
           }
           .previousPageAnimating {
-            animation: previousPage 1s cubic-bezier(0.825, 0.27, 0.895, 0.355)
+            animation: previousPage 0.5s cubic-bezier(0.825, 0.27, 0.895, 0.355)
               forwards;
           }
           .page {
             height: calc(100vh - ${getNavHeight()}px);
             width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .pages {
+            background-color: ${currentBackgroundColor};
+            transition: background-color 0.75s
+              cubic-bezier(0.825, 0.27, 0.895, 0.355);
           }
           #pages {
             margin-top: calc(
