@@ -8,6 +8,7 @@ export default class MyApp extends App {
   navRef = React.createRef<HTMLDivElement>();
 
   render() {
+    console.log(process.env.firebase_api_key)
     const { Component, pageProps, router } = this.props;
     return (
       <>

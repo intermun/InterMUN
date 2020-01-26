@@ -12,7 +12,7 @@ type FormData = {
 };
 
 const Form: NextPage<{ steps: Step[] }> = props => {
-  console.log(process.env.firebase_database_url)
+  firebase.database()
   const [currentPair, setCurrentPair] = useState<{
     step: number;
     field: number;

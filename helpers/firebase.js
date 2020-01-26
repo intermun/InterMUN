@@ -9,4 +9,6 @@ let config = {
     messagingSenderId: process.env.firebase_messaging_sender_id
 };
 
+console.log(config)
+
 export default !firebase.apps.length ? firebase.initializeApp(config) : firebase.app();
