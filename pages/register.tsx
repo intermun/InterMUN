@@ -1,4 +1,5 @@
 import Form from "../components/form";
+import firebase from "../helpers/firebase";
 
 export type StepField = {
   id: string;
@@ -84,6 +85,15 @@ const _steps: Step[] = [
 
 const Register = () => {
   return <Form steps={_steps} />;
+};
+
+Register.getInitialProps = async () => {
+  const docs = await firebase
+    .firestore()
+    .collection("delegates")
+    .get();
+  docs.docs.map(doc => doc.data()).map(console.log);
+  return {};
 };
 
 export default Register;

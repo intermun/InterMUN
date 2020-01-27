@@ -3,7 +3,6 @@ import WindowSizeListener from "./windowSizeListener";
 import I18n from "../i18n/i18n";
 import { NextPage } from "next";
 import { Step, StepField } from "../pages/register";
-import firebase from "../helpers/Firebase.js"
 
 type FormData = {
   [key: string]: {
@@ -12,7 +11,6 @@ type FormData = {
 };
 
 const Form: NextPage<{ steps: Step[] }> = props => {
-  firebase.database()
   const [currentPair, setCurrentPair] = useState<{
     step: number;
     field: number;
@@ -129,8 +127,8 @@ const Form: NextPage<{ steps: Step[] }> = props => {
   };
 
   const sendFormData = (): void => {
-    console.log(formData)
-  }
+    console.log(formData);
+  };
 
   const jumpTo = (index: number, step: number): void => {
     if (index === currentPair.step && step === currentPair.field) {
@@ -453,7 +451,9 @@ const Form: NextPage<{ steps: Step[] }> = props => {
           <div className="montserrat final-step-button" onClick={goPrev}>
             PREVIOUS
           </div>
-          <div className="montserrat final-step-button" onClick={sendFormData}>CONFIRM</div>
+          <div className="montserrat final-step-button" onClick={sendFormData}>
+            CONFIRM
+          </div>
         </div>
       </div>
       <style jsx>{`
