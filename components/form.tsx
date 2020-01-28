@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import WindowSizeListener from "./windowSizeListener";
 import I18n from "../i18n/i18n";
+import firebase from "../helpers/firebase";
 import { NextPage } from "next";
 import { Step, StepField } from "../pages/register";
 
@@ -126,8 +127,20 @@ const Form: NextPage<{ steps: Step[] }> = props => {
     animate("prev", "prev");
   };
 
-  const sendFormData = (): void => {
-    console.log(formData);
+  const sendFormData = async () => {
+    const processedData: any = {}
+    Object.entries(formData).forEach(el => {
+      Object.entries(el[1]).forEach(item => {
+        if(item[0] !== ""){
+          processedData[item[0]] = item[1];
+        }
+      })
+    });
+    console.log(processedData)
+    const docs = await firebase
+      .firestore()
+      .collection("delegates")
+      .add(processedData);
   };
 
   const jumpTo = (index: number, step: number): void => {

@@ -1,5 +1,4 @@
 import Form from "../components/form";
-import firebase from "../helpers/firebase";
 import { NextPage } from "next";
 
 export type StepField = {
@@ -96,17 +95,6 @@ const Register: NextPage<{ data: any }> = props => {
       `}</style>
     </>
   );
-};
-
-Register.getInitialProps = async () => {
-  const docs = await firebase
-    .firestore()
-    .collection("delegates")
-    .get();
-  const data = docs.docs.map(doc => doc.data());
-  return {
-    data
-  };
 };
 
 export default Register;
