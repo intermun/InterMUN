@@ -1,4 +1,5 @@
 import Form from "../components/form";
+import { NextPage } from "next";
 
 export type StepField = {
   id: string;
@@ -82,8 +83,18 @@ const _steps: Step[] = [
   }
 ];
 
-const Register = () => {
-  return <Form steps={_steps} />;
+const Register: NextPage<{ data: any }> = props => {
+  return (
+    <>
+      <div id="test">{JSON.stringify(props.data)}</div>
+      <Form steps={_steps} />
+      <style jsx>{`
+        #test {
+          color: white;
+        }
+      `}</style>
+    </>
+  );
 };
 
 export default Register;
