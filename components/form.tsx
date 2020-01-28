@@ -136,7 +136,6 @@ const Form: NextPage<{ steps: Step[] }> = props => {
         }
       })
     });
-    console.log(processedData)
     const docs = await firebase
       .firestore()
       .collection("delegates")
