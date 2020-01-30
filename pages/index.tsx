@@ -49,7 +49,7 @@ const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
     }
   }, [pageAnimation]);
 
-  const onUpScroll = () => {
+  const onPrevScroll = () => {
     if (currentPageIndex !== 0) {
       isScrollingAllowed.current = false;
       pages[currentPageIndex - 1].ref.current?.startReverseAnimation();
@@ -57,14 +57,14 @@ const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
       setTimeout(() => {
         setPageAnimation("previousPageAnimating");
         setTimeout(() => {
-          pages[currentPageIndex].ref.current?.hide();
+          pages[currentPageIndex].ref.current?.stopAnimation();
           setCurrentPageIndex(currentPageIndex => currentPageIndex - 1);
         }, 1000);
       }, 250);
     }
   };
 
-  const onDownScroll = () => {
+  const onNextScroll = () => {
     if (currentPageIndex !== pages.length - 1) {
       isScrollingAllowed.current = false;
       pages[currentPageIndex + 1].ref.current?.startAnimation();
@@ -72,7 +72,7 @@ const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
       setTimeout(() => {
         setPageAnimation("nextPageAnimating");
         setTimeout(() => {
-          pages[currentPageIndex].ref.current?.hide();
+          pages[currentPageIndex].ref.current?.stopAnimation();
           setCurrentPageIndex(currentPageIndex => currentPageIndex + 1);
         }, 1000);
       }, 250);
@@ -90,13 +90,13 @@ const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
   const onTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
     const end = event.changedTouches[0];
     if (isScrollingAllowed.current && start.current) {
-      end.screenY > start.current.screenY ? onUpScroll() : onDownScroll();
+      end.screenY > start.current.screenY ? onPrevScroll() : onNextScroll();
     }
   };
 
   const onWheel = (event: React.WheelEvent<HTMLDivElement>) => {
     if (isScrollingAllowed.current) {
-      event.deltaY < 0 ? onUpScroll() : onDownScroll();
+      event.deltaY < 0 ? onPrevScroll() : onNextScroll();
     }
   };
 
@@ -110,14 +110,14 @@ const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
       >
         <div id="pages" className={`${pageAnimation} pages`}>
           {pages.map((e: SubPage, index: number) => (
-            <>
-              <div className="page" key={e.key}>
+            <React.Fragment key={e.key}>
+              <div className="page">
                 {e.content}
                 <div id="fancy-container">
                   <Fancy index={index} ref={e.ref} />
                 </div>
               </div>
-            </>
+            </React.Fragment>
           ))}
         </div>
       </div>

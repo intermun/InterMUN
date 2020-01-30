@@ -2,28 +2,30 @@ import React from "react";
 
 export type FancyTypes = {
   startAnimation(): void;
-  hide(): void;
   startReverseAnimation(): void;
+  stopAnimation(): void;
 };
+
+enum AnimationState {
+  animating = "animating",
+  notAnimating = "not-animating",
+  animatingReverse = "animating-reverse"
+}
 
 const Fancy: React.RefForwardingComponent<FancyTypes, { index: number }> = (
   { index },
   ref
 ) => {
   const [animationState, setAnimationState] = React.useState("");
-  const [isReversing, setIsReversing] = React.useState(false);
-  const [isHidden, setIsHidden] = React.useState(false);
   React.useImperativeHandle(ref, () => ({
     startAnimation: () => {
-      setIsHidden(false);
-      setAnimationState("animating");
+      setAnimationState(AnimationState.animating);
     },
-    hide: () => {
-      setIsHidden(true);
+    stopAnimation: () => {
+      setAnimationState(AnimationState.notAnimating);
     },
     startReverseAnimation: () => {
-      setIsHidden(false);
-      //TODO:
+      setAnimationState(AnimationState.animatingReverse);
     }
   }));
   return (
@@ -33,7 +35,6 @@ const Fancy: React.RefForwardingComponent<FancyTypes, { index: number }> = (
         height="100%"
         viewBox="0 0 500 500"
         preserveAspectRatio="none"
-        className={isHidden ? "hidden" : ""}
       >
         {/* <path
           className="path"
@@ -56,6 +57,7 @@ const Fancy: React.RefForwardingComponent<FancyTypes, { index: number }> = (
           "
         /> */}
         <path
+          id={`path${index}`}
           className="fill"
           d="
             M 260 500
@@ -84,8 +86,10 @@ const Fancy: React.RefForwardingComponent<FancyTypes, { index: number }> = (
         </linearGradient>
       </svg>
       <style jsx>{`
-        .hidden {
-          opacity: 0;
+        #path${index} {
+          ${index % 2 == 1
+            ? "display: block; transform: scaleX(-1); transform-origin: 50% 50%;"
+            : ""}
         }
         .fill {
           stroke: none;
@@ -95,12 +99,12 @@ const Fancy: React.RefForwardingComponent<FancyTypes, { index: number }> = (
         .clip-rect {
           height: 0;
         }
-        .animating {
-          animation: reveal 2s cubic-bezier(1, 0, 0, 1)
-            ${isReversing ? "reverse" : "normal"} forwards;
+        .${AnimationState.animating} {
+          animation: reveal 2s cubic-bezier(1, 0, 0, 1) forwards;
         }
-        .hidden {
-          width: 0%;
+        .${AnimationState.animatingReverse} {
+          height: 100%;
+          animation: reveal-reverse 2s cubic-bezier(1, 0, 0, 1) forwards;
         }
         /*
         .path {
@@ -125,6 +129,16 @@ const Fancy: React.RefForwardingComponent<FancyTypes, { index: number }> = (
         */
         @keyframes reveal {
           to {
+            height: 100%;
+          }
+        }
+        @keyframes reveal-reverse {
+          from {
+            y: 500;
+            height: 0;
+          }
+          to {
+            y: 0;
             height: 100%;
           }
         }
