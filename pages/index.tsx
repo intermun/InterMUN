@@ -12,12 +12,12 @@ type SubPage = {
 const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
   const pages: SubPage[] = [
     {
-      backgroundColor: "green",
+      backgroundColor: "#1b2133",
       key: "page1",
       content: <>Page 1</>
     },
     {
-      backgroundColor: "blue",
+      backgroundColor: "#1b3324",
       key: "page2",
       content: <>Page 2</>
     }
@@ -114,7 +114,7 @@ const Home: NextPage<{ navRef: React.RefObject<HTMLDivElement> }> = props => {
               <div className="page">
                 {e.content}
                 <div id="fancy-container">
-                  <Fancy index={index} ref={e.ref} />
+                  <Fancy index={index} ref={e.ref} color={e.backgroundColor} />
                 </div>
               </div>
             </React.Fragment>

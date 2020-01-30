@@ -1,4 +1,5 @@
 import React from "react";
+import Color from "color";
 
 export type FancyTypes = {
   startAnimation(): void;
@@ -12,10 +13,10 @@ enum AnimationState {
   animatingReverse = "animating-reverse"
 }
 
-const Fancy: React.RefForwardingComponent<FancyTypes, { index: number }> = (
-  { index },
-  ref
-) => {
+const Fancy: React.RefForwardingComponent<
+  FancyTypes,
+  { index: number; color: string }
+> = ({ index, color }, ref) => {
   const [animationState, setAnimationState] = React.useState("");
   React.useImperativeHandle(ref, () => ({
     startAnimation: () => {
@@ -36,39 +37,21 @@ const Fancy: React.RefForwardingComponent<FancyTypes, { index: number }> = (
         viewBox="0 0 500 500"
         preserveAspectRatio="none"
       >
-        {/* <path
-          className="path"
-          id="left-path"
-          d="
-            M 240 0
-            l 0 15
-            C 240 40 70 145 25 220
-            C -30 320 240 500 240 500
-          "
-        />
-        <path
-          className="path"
-          id="right-path"
-          d="
-            M 260 0
-            l 0 15
-            c 0 60 -75 210 -75 270
-            C 180 390 260 500 260 500
-          "
-        /> */}
         <path
           id={`path${index}`}
           className="fill"
           d="
-            M 260 500
-            c 0 0 -75 -105 -75 -210 
-            c 0 -60 75 -210 75 -270 
-            L 260 0
-            h -20
-            l 0 15
-            C 240 40 70 145 25 220
-            C -30 320 240 500 240 500
-            H 260
+            M 240 0
+            c 0 0 0 18.37 0 19.83
+            c 0 71.5 -170.61 115.99 -214.3 189.38
+            C -28.61 300.44 240 393.4 240 479.67
+            c 0 12.37 0 20.33 0 20.33
+            h 20
+            c 0 0 0 -15.94 0 -20.33
+            c 0 -55.52 -77.48 -110.98 -76.61 -208.46
+            c 0.51 -56.84 74.77 -185.76 76.48 -251.45
+            C 260 14.85 260 0 260 0
+            L 240 0
             z
           "
         />
@@ -80,9 +63,16 @@ const Fancy: React.RefForwardingComponent<FancyTypes, { index: number }> = (
             width="100%"
           />
         </clipPath>
-        <linearGradient id="gradient">
-          <stop offset="0%" stopColor="#ffafbd" />
-          <stop offset="100%" stopColor="#ffc3a0" />
+        <linearGradient id={`gradient${index}`} gradientTransform="rotate(90)">
+          <stop offset="0%" stopColor="black" />
+          <stop
+            offset="50%"
+            stopColor={Color(color)
+              .lighten(0.75)
+              .saturate(0.5)
+              .string()}
+          />
+          <stop offset="100%" stopColor="black" />
         </linearGradient>
       </svg>
       <style jsx>{`
@@ -93,40 +83,19 @@ const Fancy: React.RefForwardingComponent<FancyTypes, { index: number }> = (
         }
         .fill {
           stroke: none;
-          fill: url(#gradient);
+          fill: url(#gradient${index});
           clip-path: url(#clip${index});
         }
         .clip-rect {
           height: 0;
         }
         .${AnimationState.animating} {
-          animation: reveal 2s cubic-bezier(1, 0, 0, 1) forwards;
+          animation: reveal 3s cubic-bezier(1, 0, 0, 1) forwards;
         }
         .${AnimationState.animatingReverse} {
           height: 100%;
-          animation: reveal-reverse 2s cubic-bezier(1, 0, 0, 1) forwards;
+          animation: reveal-reverse 3s cubic-bezier(1, 0, 0, 1) forwards;
         }
-        /*
-        .path {
-          stroke: black;
-          fill: none;
-          stroke-width: 5px;
-          animation: dash 3s linear forwards;
-        }
-        #left-path {
-          stroke-dasharray: 700;
-          stroke-dashoffset: 700;
-        }
-        #right-path {
-          stroke-dasharray: 530;
-          stroke-dashoffset: 530;
-        }
-        @keyframes dash {
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-        */
         @keyframes reveal {
           to {
             height: 100%;
