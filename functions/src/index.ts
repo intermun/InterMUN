@@ -9,6 +9,6 @@ exports.test = functions.https.onRequest(async (req, res) => {
   res.sendStatus(200);
 });
 
-exports.listener = functions.firestore.document('delegates/{delegateId}').onCreate((snap, context) => {
+exports.meme = functions.firestore.document('delegates/{delegateId}').onCreate((snap, context) => {
   console.log(snap.data())
 })
