@@ -12,6 +12,7 @@ exports.meme = functions.firestore
       const msg = {
         to: data.email,
         from: functions.config().sendgrid.from,
+        subject: "Delegate Confirmation",
         templateId: functions.config().sendgrid.template,
         dynamic_template_data: {
           committee: data.committee,
