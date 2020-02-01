@@ -1,9 +1,14 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
-admin.initializeApp(functions.config().firebase)
+admin.initializeApp()
 const db = admin.firestore();
 
-db.collection("delegates").onSnapshot((doc: any) => {
-  console.log(doc.data());
+exports.test = functions.https.onRequest(async (req, res) => {
+  await db.collection("delegates").add({ test: "yes" });
+  res.sendStatus(200);
+});
+
+exports.listener = functions.firestore.document('delegates/{delegateId}').onCreate((snap, context) => {
+  console.log(snap.data())
 })
