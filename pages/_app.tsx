@@ -1,5 +1,6 @@
 import React from "react";
 import Nav from "../components/nav";
+import Dialog, { DialogTypes } from "../components/dialog";
 import Head from "next/head";
 import { PageTransition } from "next-page-transitions";
 import { NextComponentType, NextPageContext } from "next";
@@ -15,6 +16,20 @@ const App = ({
   router: Router;
 }) => {
   const navRef = React.useRef<HTMLDivElement>(null);
+  const dialogRef = React.useRef<DialogTypes | null>(null);
+  const [isDialogHidden, setIsDialogHidden] = React.useState<boolean>(true);
+
+  const dialogContent = React.useRef<JSX.Element>(<></>);
+
+  React.useEffect(() => {
+    dialogRef.current?.config(dialogContent.current);
+  }, [isDialogHidden]);
+
+  const configDialog = (content: JSX.Element) => {
+    dialogContent.current = content;
+    setIsDialogHidden(false);
+  };
+
   return (
     <>
       <Head>
@@ -31,9 +46,18 @@ const App = ({
           crossOrigin="anonymous"
         ></link>
       </Head>
+      {!isDialogHidden && (
+        <Dialog ref={dialogRef} setIsHidden={setIsDialogHidden} />
+      )}
       <Nav ref={navRef} />
       <PageTransition timeout={300} classNames="page-transition">
-        <Component {...pageProps} navRef={navRef} key={router.route} />
+        <Component
+          {...pageProps}
+          navRef={navRef}
+          key={router.route}
+          configDialog={configDialog}
+          dialogRef={dialogRef}
+        />
       </PageTransition>
       <style jsx global>{`
         ::-webkit-scrollbar {

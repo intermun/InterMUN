@@ -4,6 +4,8 @@ import I18n from "../i18n/i18n";
 import firebase from "../helpers/firebase";
 import { NextPage } from "next";
 import { Step, StepField } from "../pages/register";
+import { DialogTypes } from "./dialog";
+import success from "./success";
 
 type FormData = {
   [key: string]: {
@@ -11,7 +13,11 @@ type FormData = {
   };
 };
 
-const Form: NextPage<{ steps: Step[] }> = props => {
+const Form: NextPage<{
+  steps: Step[];
+  dialogRef: React.MutableRefObject<DialogTypes | null>;
+  configDialog(content: JSX.Element): void;
+}> = props => {
   const [currentPair, setCurrentPair] = useState<{
     step: number;
     field: number;
@@ -120,6 +126,8 @@ const Form: NextPage<{ steps: Step[] }> = props => {
       }, 2000);
       return;
     }
+          props.configDialog(success);
+
     animate("next", "next");
   };
 
@@ -128,18 +136,20 @@ const Form: NextPage<{ steps: Step[] }> = props => {
   };
 
   const sendFormData = async () => {
-    const processedData: any = {}
+    const processedData: any = {};
     Object.entries(formData).forEach(el => {
       Object.entries(el[1]).forEach(item => {
-        if(item[0] !== ""){
+        if (item[0] !== "") {
           processedData[item[0]] = item[1];
         }
-      })
+      });
     });
-    const docs = await firebase
-      .firestore()
-      .collection("delegates")
-      .add(processedData);
+    try {
+      await firebase
+        .firestore()
+        .collection("delegates")
+        .add(processedData);
+    } catch (error) {}
   };
 
   const jumpTo = (index: number, step: number): void => {
