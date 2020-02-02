@@ -6,6 +6,9 @@ import { NextPage } from "next";
 import { Step, StepField } from "../pages/register";
 import { DialogTypes } from "./dialog";
 import success from "./success";
+import failure from "./failure";
+
+import { useRouter } from "next/router";
 
 type FormData = {
   [key: string]: {
@@ -17,7 +20,9 @@ const Form: NextPage<{
   steps: Step[];
   dialogRef: React.MutableRefObject<DialogTypes | null>;
   configDialog(content: JSX.Element): void;
+  hideDialog(callback?: () => void): void;
 }> = props => {
+  const router = useRouter();
   const [currentPair, setCurrentPair] = useState<{
     step: number;
     field: number;
@@ -126,8 +131,6 @@ const Form: NextPage<{
       }, 2000);
       return;
     }
-          props.configDialog(success);
-
     animate("next", "next");
   };
 
@@ -149,7 +152,16 @@ const Form: NextPage<{
         .firestore()
         .collection("delegates")
         .add(processedData);
-    } catch (error) {}
+      props.configDialog(
+        success(() =>
+          props.hideDialog(() => {
+            router.push("/");
+          })
+        )
+      );
+    } catch (error) {
+      props.configDialog(failure(props.hideDialog));
+    }
   };
 
   const jumpTo = (index: number, step: number): void => {

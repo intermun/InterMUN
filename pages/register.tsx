@@ -67,6 +67,7 @@ const Register: NextPage<{
   data: any;
   dialogRef: React.MutableRefObject<DialogTypes | null>;
   configDialog(content: JSX.Element): void;
+  hideDialog(callback?:(() => void)): void;
 }> = props => {
   return (
     <>
@@ -75,6 +76,7 @@ const Register: NextPage<{
         steps={_steps}
         dialogRef={props.dialogRef}
         configDialog={props.configDialog}
+        hideDialog={props.hideDialog}
       />
       <style jsx>{`
         #test {

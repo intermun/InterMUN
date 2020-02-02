@@ -30,6 +30,13 @@ const App = ({
     setIsDialogHidden(false);
   };
 
+  const hideDialog = (callback?: () => void) => {
+    if (callback) {
+      callback();
+    }
+    dialogRef.current?.hide();
+  };
+
   return (
     <>
       <Head>
@@ -56,6 +63,7 @@ const App = ({
           navRef={navRef}
           key={router.route}
           configDialog={configDialog}
+          hideDialog={hideDialog}
           dialogRef={dialogRef}
         />
       </PageTransition>

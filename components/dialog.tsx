@@ -2,7 +2,7 @@ import React from "react";
 
 export type DialogTypes = {
   config(body: JSX.Element): void;
-  toggle(flag: boolean): void;
+  hide(): void;
 };
 
 enum AnimationState {
@@ -29,8 +29,8 @@ const Dialog: React.RefForwardingComponent<
     config: (body: JSX.Element) => {
       setContent(body);
     },
-    toggle: (flag: boolean) => {
-      setIsHidden(flag);
+    hide: () => {
+      setAnimationState(AnimationState.exiting);
     }
   }));
   const onClickOutside = () => {
